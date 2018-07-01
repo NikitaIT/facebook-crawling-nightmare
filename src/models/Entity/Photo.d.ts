@@ -1,0 +1,19 @@
+export type Photo = {
+    id:string,
+    extraData:Text,
+    albumId:string,
+    date:Date,
+    dateUpdated:Date,
+    place:Text,
+    width:number,
+    height:number,
+    text:Text,
+    location:Text,
+    likesCount:number,
+    repostCount:number,
+    commentsCount:number,
+    tagsCount:number,
+    photoSmall:string,
+    photoMedium:string,
+    photoLarge:string
+}

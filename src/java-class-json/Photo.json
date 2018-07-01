@@ -1,0 +1,61 @@
+{
+  "name" : "Photo",
+  "properties" : [ {
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "TEXT",
+    "name" : "extraData"
+  }, {
+    "type" : "STRING",
+    "name" : "albumId"
+  }, {
+    "type" : "DATE",
+    "name" : "date"
+  }, {
+    "type" : "DATE",
+    "name" : "dateUpdated"
+  }, {
+    "type" : "TEXT",
+    "name" : "place"
+  }, {
+    "type" : "NUMBER",
+    "name" : "width",
+    "indexed" : false,
+    "priority" : 11,
+    "isArray" : false,
+    "isUnique" : false,
+    "isTitle" : false,
+    "propertyEquality" : ""
+  }, {
+    "type" : "NUMBER",
+    "name" : "height"
+  }, {
+    "type" : "TEXT",
+    "name" : "text"
+  }, {
+    "type" : "TEXT",
+    "name" : "location"
+  }, {
+    "type" : "NUMBER",
+    "name" : "likesCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "repostCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "commentsCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "tagsCount"
+  }, {
+    "type" : "STRING",
+    "name" : "photoSmall"
+  }, {
+    "type" : "STRING",
+    "name" : "photoMedium"
+  }, {
+    "type" : "STRING",
+    "name" : "photoLarge"
+  } ]
+}

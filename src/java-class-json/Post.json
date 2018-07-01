@@ -1,0 +1,64 @@
+{
+  "name" : "Post",
+  "properties" : [ {
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "TEXT",
+    "name" : "extraData"
+  }, {
+    "type" : "STRING",
+    "name" : "replyOwnerId"
+  }, {
+    "type" : "NUMBER",
+    "name" : "commentsCount"
+  }, {
+    "type" : "TEXT",
+    "name" : "location"
+  }, {
+    "type" : "DATE",
+    "name" : "date"
+  }, {
+    "type" : "NUMBER",
+    "name" : "likesCount"
+  }, {
+    "type" : "STRING",
+    "name" : "replyUserId"
+  }, {
+    "type" : "STRING",
+    "name" : "replyToPostId"
+  }, {
+    "type" : "STRING",
+    "name" : "lang"
+  }, {
+    "type" : "TEXT",
+    "name" : "place"
+  }, {
+    "type" : "STRING",
+    "name" : "quotedPostId"
+  }, {
+    "type" : "STRING",
+    "name" : "quotedPost"
+  }, {
+    "type" : "NUMBER",
+    "name" : "repostsCount"
+  }, {
+    "type" : "STRING",
+    "name" : "platform"
+  }, {
+    "type" : "TEXT",
+    "name" : "text"
+  }, {
+    "type" : "STRING",
+    "name" : "url"
+  }, {
+    "type" : "STRING",
+    "name" : "link"
+  }, {
+    "type" : "STRING",
+    "name" : "linkName"
+  }, {
+    "type" : "STRING",
+    "name" : "linkImage"
+  } ]
+}

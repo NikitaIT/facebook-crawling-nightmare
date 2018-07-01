@@ -1,0 +1,136 @@
+{
+  "name" : "Person",
+  "properties" : [ {
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "TEXT",
+    "name" : "extraData"
+  }, {
+    "type" : "STRING",
+    "name" : "screenName"
+  }, {
+    "type" : "STRING",
+    "name" : "firstName"
+  }, {
+    "type" : "STRING",
+    "name" : "lastName"
+  }, {
+    "type" : "STRING",
+    "name" : "middleName"
+  }, {
+    "type" : "STRING",
+    "name" : "maidenName"
+  }, {
+    "type" : "STRING",
+    "name" : "name"
+  }, {
+    "type" : "DATE",
+    "name" : "birthdate"
+  }, {
+    "type" : "TEXT",
+    "name" : "country"
+  }, {
+    "type" : "TEXT",
+    "name" : "region"
+  }, {
+    "type" : "TEXT",
+    "name" : "city"
+  }, {
+    "type" : "STRING",
+    "name" : "gender"
+  }, {
+    "type" : "STRING",
+    "name" : "position"
+  }, {
+    "type" : "STRING",
+    "name" : "phone"
+  }, {
+    "type" : "STRING",
+    "name" : "phoneHome"
+  }, {
+    "type" : "BOOLEAN",
+    "name" : "deleted"
+  }, {
+    "type" : "DATE",
+    "name" : "lastSeenDate"
+  }, {
+    "type" : "DATE",
+    "name" : "lastUpdateDate"
+  }, {
+    "type" : "DATE",
+    "name" : "dateUpdated"
+  }, {
+    "type" : "STRING",
+    "name" : "platform"
+  }, {
+    "type" : "DATE",
+    "name" : "registeredDate"
+  }, {
+    "type" : "STRING",
+    "name" : "homePage"
+  }, {
+    "type" : "STRING",
+    "name" : "homePageName"
+  }, {
+    "type" : "STRING",
+    "name" : "description"
+  }, {
+    "type" : "BOOLEAN",
+    "name" : "verified"
+  }, {
+    "type" : "STRING",
+    "name" : "status"
+  }, {
+    "type" : "STRING",
+    "name" : "url"
+  }, {
+    "type" : "NUMBER",
+    "name" : "postCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "favoritesCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "friendsCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "followersCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "groupMembersCount"
+  }, {
+    "type" : "STRING",
+    "name" : "address"
+  }, {
+    "type" : "TEXT",
+    "name" : "location"
+  }, {
+    "type" : "BOOLEAN",
+    "name" : "premium"
+  }, {
+    "type" : "BOOLEAN",
+    "name" : "private_"
+  }, {
+    "type" : "DATE",
+    "name" : "statusDate"
+  }, {
+    "type" : "STRING",
+    "name" : "photo"
+  }, {
+    "type" : "STRING",
+    "name" : "photoSmall"
+  }, {
+    "type" : "STRING",
+    "name" : "photoMedium"
+  }, {
+    "type" : "STRING",
+    "name" : "photoLarge"
+  }, {
+    "type" : "STRING",
+    "name" : "email"
+  }, {
+    "type" : "STRING",
+    "name" : "relationship"
+  } ]
+}

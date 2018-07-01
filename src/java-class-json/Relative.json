@@ -1,0 +1,16 @@
+{
+  "name" : "Relative",
+  "properties" : [ {
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "TEXT",
+    "name" : "extraData"
+  }, {
+    "type" : "STRING",
+    "name" : "name"
+  }, {
+    "type" : "TEXT",
+    "name" : "type"
+  } ]
+}

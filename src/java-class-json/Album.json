@@ -1,0 +1,37 @@
+{
+  "name" : "Album",
+  "properties" : [ {
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "STRING",
+    "name" : "type"
+  }, {
+    "type" : "STRING",
+    "name" : "thumbId"
+  }, {
+    "type" : "STRING",
+    "name" : "thumbUrl"
+  }, {
+    "type" : "STRING",
+    "name" : "url"
+  }, {
+    "type" : "STRING",
+    "name" : "title"
+  }, {
+    "type" : "STRING",
+    "name" : "description"
+  }, {
+    "type" : "DATE",
+    "name" : "dateCreated"
+  }, {
+    "type" : "DATE",
+    "name" : "dateUpdated"
+  }, {
+    "type" : "NUMBER",
+    "name" : "photosCount"
+  }, {
+    "type" : "NUMBER",
+    "name" : "likesCount"
+  } ]
+}

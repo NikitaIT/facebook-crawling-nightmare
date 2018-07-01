@@ -1,0 +1,16 @@
+{
+  "name" : "Contact",
+  "properties" : [{
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "STRING",
+    "name" : "position"
+  }, {
+    "type" : "STRING",
+    "name" : "phone"
+  }, {
+    "type" : "STRING",
+    "name" : "email"
+  } ]
+}

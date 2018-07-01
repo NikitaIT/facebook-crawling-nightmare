@@ -1,0 +1,37 @@
+{
+  "name" : "PhotoTag",
+  "properties" : [ {
+    "type" : "STRING",
+    "name" : "id"
+  }, {
+    "type" : "TEXT",
+    "name" : "extraData"
+  }, {
+    "type" : "STRING",
+    "name" : "placerId"
+  }, {
+    "type" : "TEXT",
+    "name" : "text"
+  }, {
+    "type" : "STRING",
+    "name" : "title"
+  }, {
+    "type" : "DATE",
+    "name" : "date"
+  }, {
+    "type" : "STRING",
+    "name" : "userName"
+  }, {
+    "type" : "NUMBER",
+    "name" : "x"
+  }, {
+    "type" : "NUMBER",
+    "name" : "y"
+  }, {
+    "type" : "NUMBER",
+    "name" : "x2"
+  }, {
+    "type" : "NUMBER",
+    "name" : "y2"
+  } ]
+}
