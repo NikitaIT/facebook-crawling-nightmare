@@ -2,7 +2,8 @@
 //версия 2.4.1+ или около того, сейчас актуальная 3.0.1 надо переписать типы
 // они написаны на скорую руку, чтобы смотреть на них и плакать
 
-	
+/// <reference types="node" />
+
 declare class Nightmare {
 	constructor(options?: Nightmare.NightmareOptions);
     constructor(options?: Nightmare.IConstructorOptions);
@@ -24,7 +25,10 @@ declare class Nightmare {
 	scrollTo(top: number, left: number): Nightmare;
 	viewport(width: number, height: number): Nightmare;
 	inject(type: string, file: string): Nightmare;
-	evaluate<T>(fn: (...values: T[]) => any, ...values: T[]): Nightmare;
+	evaluate<R>(fn: () => R): Nightmare;
+	evaluate<T1, R>(fn: (v1:T1) => R, v1: T1): Nightmare;
+	evaluate<T1, T2, R>(fn: (v1:T1, v2:T2) => R, v1:T1, v2:T2): Nightmare;
+	evaluate<T1, T2, T3,R>(fn: (v1:T1, v2:T2, v3:T3) => R, v1:T1, v2:T2, v3:T3): Nightmare;
 	wait(ms: number): Nightmare;
 	wait(selector: string): Nightmare;
 	wait<T>(fn: (...values: T[]) => boolean, ...values: T[]): Nightmare;
@@ -419,10 +423,4 @@ declare namespace Nightmare {
     }
 }
 
-export default Nightmare;
-export as namespace Nightmare;
-
-
-//declare module 'nightmare' {
-    //export = Nightmare
-//}
+export = Nightmare;
