@@ -12,5 +12,8 @@
   },
   "include": [
     "src/**/*"
+  ],
+  "files": [
+      "@types/nightmare.d.ts"
   ]
 }

@@ -1,4 +1,5 @@
 dist/
+src/auth.json
 # Logs
 logs
 *.log

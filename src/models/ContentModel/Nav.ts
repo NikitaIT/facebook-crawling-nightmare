@@ -1,11 +1,13 @@
-enum MainNav{
+import * as Nightmare  from "nightmare";
+
+export enum MainNav{
 	Timeline = "timeline",
 	About = "about",
 	Friends = "friends",
 	Photos = "photos",
 	More = "", //wtf last-child
 }
-enum SubNav{
+export enum SubNav{
 	Videos= "videos",
 	CheckIns= "map",
 	Sports= "sports",
@@ -21,4 +23,6 @@ enum SubNav{
 	Notes= "notes",
 	Instagram= "124024574287414" //wtf last-child
 }
-const NavSelector = "[data-tab-key*='{0}']";
+const NavSelector = "a[data-tab-key*='{0}']";
+export const gotoPageFor = (profile: Nightmare) => (page: MainNav) => profile.click(`a[data-tab-key*="${page}"]`);
+export type TGotoPageForProfile = (menuItem: MainNav) => Nightmare;
