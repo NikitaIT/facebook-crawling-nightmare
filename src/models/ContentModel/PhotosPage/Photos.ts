@@ -1,75 +1,161 @@
-import { TGotoPageForProfile, MainNav } from "../Nav";
-type TPhotoPage = {
-    id:string,
-    extraData:Text,
-    albumId:string,
-    date:Date,
-    dateUpdated:Date,
-    place:Text,
-    width:number,
-    height:number,
+import { TGotoPageForProfile, MainNav, gotoPageFor } from "../Nav";
+import * as Nightmare from "nightmare";
+import { gotoTabOn, EPhotosTabs } from "./PhotosTabs";
+import { getBase64Image, chainPromiseFn } from "../../../utils/utils";
+export type TPhotoPage = TPhotoPopup & {
+    id?:number,
+    albumId?:string,
+}
+type TPhotoPopup = {
+    width?:number,
+    height?:number,
+    photoSmall?:string,
+    photoMedium?:string,
+    photoLarge?:string
+}
+type TPhotoPostPage = {
     text:Text,
     location:Text,
     likesCount:number,
     repostCount:number,
     commentsCount:number,
-    tagsCount:number,
-    photoSmall:string,
-    photoMedium:string,
-    photoLarge:string
+    tagsCount:number,// это то сколько друзей отмечено на фото, тоже в посте
+    date:Date,
+    dateUpdated:Date,
+    place:Text,
+    extraData:Text,
 }
-type TAlbum = { //a[href*="/media/set"]
-    id:string,
-    type:string, 
-    thumbId:string,
-    thumbUrl:string,
+export type TAlbum = { //a[href*="/media/set"]
+    id?:number,
+    type?:string, 
+    thumbId?:number,
+    thumbUrl?:string,
     url:string,
     title:string,
-    description:string,
-    dateCreated:string,
-    dateUpdated:string,
-    photosCount:string,
-    likesCount:string,
+    description?:string,
+    dateCreated?:Date,
+    dateUpdated?:Date,
+    photosCount:number,
+    likesCount?:number,
+    postsCount:number
 }
 
 class DataSelector{
-    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => ()  : Promise<TPhotoPage[]> => {
+    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => (tab: EPhotosTabs) :() => Promise<TAlbum[]|TPhotoPage[]> => {
+        console.debug("run TPhotoPage")
         const   selectorSection:string = `a[href*="/media/set"]`,
-                nm = gotoPageForProfile(MainNav.Photos).wait(1000),
-                id = 100025424408094;
-
-        
-        return  new Promise((resolve,reject) =>{
-            nm.evaluate((selectorSection)=> {
-                return new Promise<boolean>((resolve,reject) =>{
-                    let count = 0;
-                    const timerId = setInterval( ()=> {
-                        let prevCount = count;
-                        count = document.querySelectorAll(selectorSection).length;
-                        if(count == prevCount){
-                            clearInterval(timerId);
-                            resolve(true);
+                photosPage = gotoPageForProfile(MainNav.Photos).wait(1000),
+                id = 100025424408094,
+                scrollImagesOn = (nightmare: Nightmare) => 
+                    nightmare.evaluate((selectorSection)=> {
+                        return new Promise<boolean>((resolve,reject) =>{
+                            let count = 0;
+                            const timerId = setInterval( ()=> {
+                                let prevCount = count;
+                                count = document.querySelectorAll(selectorSection).length;
+                                if(count == prevCount){
+                                    clearInterval(timerId);
+                                    resolve(true);
+                                }
+                                window.scrollBy(0, 10000);
+                            },1000);
+                        });
+                    },selectorSection),
+                gotoTab = (tab: EPhotosTabs) => scrollImagesOn((console.log(tab),gotoTabOn(photosPage)(tab))),
+                getData = <T = TAlbum|TPhotoPage>(tab: EPhotosTabs) => 
+                (): Promise<T[]>  => new Promise((resolve,reject) =>{
+                    gotoTab(tab)
+                    .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
+                        if(x === true){
+                            console.debug("then TPhotoPage start evaluator", tab);
+                            photosPage
+                            .evaluate(DataSelector.evaluator(tab),id)
+                            //.then(DataSelector.mapper)
+                            .then((c:T[])=> (console.log(c),resolve(c)))
+                            .catch(console.error)
                         }
-                        window.scrollBy(0, 10000);
-                    },1000);
-                });
-            },selectorSection)
-            .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
-                if(x === true){
-                    nm
-                    .evaluate(DataSelector.evaluator,id)
-                    //.then(DataSelector.mapper)
-                    .then((c:TPhotoPage[])=> (console.log(c),resolve(c)))
+                    })
                     .catch(console.error)
-                }
-            }
-            )
-        });
+                });
+        switch (tab) {
+            case EPhotosTabs.Albums:
+                return getData<TAlbum>(tab);
+            case EPhotosTabs.Photos:
+                return getData<TPhotoPage>(tab);
+            case EPhotosTabs.PhotosOf:
+                return getData<TPhotoPage>(tab);
+            default:
+                throw Error();
+        }
     };
-    private static evaluator(id: number) : TPhotoPage[]{
-        const   albomHrefs = Array.from(document.querySelectorAll<HTMLLinkElement>(`a[href*="/media/set"]`));
+    //Todo: сделать рефакторинг - стратегия.
+    private static evaluator(tab: EPhotosTabs): (id: number) => (TAlbum|TPhotoPage)[] | Promise<(TAlbum|TPhotoPage)[]>{
+        switch (tab) {
+            case EPhotosTabs.Albums:
+                return DataSelector.albumEvaluator;
+            case EPhotosTabs.Photos:
+            case EPhotosTabs.PhotosOf:
+                return DataSelector.photosEvaluator;
+            default:
+                break;
+        }
+    }
+    // private static photosEvaluator(id: number): Promise<TPhotoPage[]>{
+    //     const   photoItems = Array.from(document.querySelectorAll<HTMLLIElement>(`[id*="pagelet_timeline_app_collection"]:not(.hidden_elem) li.fbPhotoStarGridElement`));
+
+    //     const photoItemsPromises: Promise<TPhotoPage>[] = 
+    //         photoItems.map((x) : Promise<TPhotoPage> => {
+    //             const   textContent = Array.from(x.querySelectorAll<HTMLSpanElement>("span"))
+    //                                 .filter( q => q.innerText !== "")
+    //                                 .map(q => q.textContent),
+    //                     albom = x.querySelector<HTMLLinkElement>(`a[href*="/media/set"]`);
+
+               
+    //             return new Promise<TPhotoPopup>((resolve,reject) =>{
+    //                 x.click(); // open popup
+    //                 const timerId = setInterval( ()=> {
+    //                     if(document.querySelector(`.stage img`)){
+    //                         clearInterval(timerId);
+    //                         const   imgOriginal = x.querySelector<HTMLImageElement>(`.stage img`),
+    //                                 imgFilds = {
+    //                                     width: imgOriginal.naturalWidth,
+    //                                     height: imgOriginal.naturalHeight, // работает, т.к. цель хром
+    //                                     photoSmall:"string",
+    //                                     photoMedium:"string",
+    //                                     photoLarge: imgOriginal && getBase64Image(imgOriginal),
+    //                                 };
+    //                         document.querySelector<HTMLLinkElement>(`#photos_snowlift a[data-ft*="003C"]`).click(); // close popup
+    //                         resolve(imgFilds);
+    //                     }
+    //                 },500);
+    //             }).then<TPhotoPage>(imgFilds => ({
+    //                 id: 1,
+    //                 albumId: albom && albom.href,
+    //                 ...imgFilds
+    //             }));
+    //         });
+    //     return Promise.all(photoItemsPromises);
+    // };
+    private static photosEvaluator(id: number): TPhotoPage[]{
+        const   photoItems = Array.from(document.querySelectorAll<HTMLLIElement>(`[id*="pagelet_timeline_app_collection"]:not(.hidden_elem) li.fbPhotoStarGridElement`));
+
+        return photoItems.map((x) : TPhotoPage => {
+                const   textContent = Array.from(x.querySelectorAll<HTMLSpanElement>("span"))
+                                    .filter( q => q.innerText !== "")
+                                    .map(q => q.textContent),
+                        albom = x.querySelector<HTMLLinkElement>(`a[href*="/media/set"]`);
+
+               
+                return {
+                    id: x && x.dataset["fbid"] && parseInt( x.dataset["fbid"], 10),
+                    albumId: albom && albom.href
+                };
+            });
+    };
+    private static albumEvaluator(id: number) : TAlbum[]{
+        const   albumHrefs = Array.from(document.querySelectorAll<HTMLLinkElement>(`[id*="pagelet_timeline_app_collection"]:not(.hidden_elem) a[href*="/media/set"]`));
         
-        return albomHrefs.map((x) : TPhotoPage=> {
+        return albumHrefs.map((x) : TAlbum=> {
                 const   textContent = Array.from(x.querySelectorAll<HTMLSpanElement>("span"))
                                     .filter( q => q.innerText !== "")
                                     .map(q => q.textContent),
@@ -77,11 +163,18 @@ class DataSelector{
                 return {
                 thumbUrl: img && img.src,
                 url:    x.href,
-                title:  textContent[0],
-                photosCount:textContent[2] && parseInt(textContent[2]
-                    .match(/(\d+) Items/)[1]
-                    || "0",10)
-            }as any
+                title:  textContent && textContent[0],
+                photosCount: 
+                    textContent 
+                    && textContent[1]
+                    && textContent[1].match(/(\d+) Items/)
+                    && parseInt(textContent[1].match(/(\d+) Items/)[1] || "0",10),
+                postsCount: 
+                    textContent 
+                    && textContent[1]
+                    && textContent[1].match(/(\d+) Post/)
+                    && parseInt(textContent[1].match(/(\d+) Post/)[1] || "0",10),
+            }
         });
     };
     private static mapper(){

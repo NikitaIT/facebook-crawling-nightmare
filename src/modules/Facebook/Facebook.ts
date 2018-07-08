@@ -10,12 +10,14 @@ import { Photo } from '../../models/Entity/Photo';
 import { PhotoTag } from '../../models/Entity/PhotoTag';
 import { Post } from '../../models/Entity/Post';
 import { Relative } from '../../models/Entity/Relative';
-import { gotoPageFor } from '../../models/ContentModel/Nav';
+import { gotoPageFor, MainNav } from '../../models/ContentModel/Nav';
 import { LifeEvents } from '../../models/ContentModel/AboutPage/LifeEvents';
 import { Friends } from '../../models/ContentModel/FriendsPage/Friends';
 import { ContactandBasicInfo } from '../../models/ContentModel/AboutPage/ContactandBasicInfo';
 import * as Nightmare from 'nightmare';
-import { PostPages } from '../../models/ContentModel/RootPage/Posts';
+import { PostPages, TPostPage } from '../../models/ContentModel/RootPage/Posts';
+import { PhotosPages, TAlbum, TPhotoPage } from '../../models/ContentModel/PhotosPage/Photos';
+import { EPhotosTabs } from '../../models/ContentModel/PhotosPage/PhotosTabs';
 
 type Person1 = {
     id:string,
@@ -72,42 +74,35 @@ enum Search{
 
 //const logger: Logger = log4js.getLogger("Facebook");
 interface IFacebook{
-	goToPage(nightmare : Nightmare, 
-		id: string | number, 
-		conf?: {
-			rootUrl: string,
-			profileRoute: string
-		}): void,
-	getUserIdByPage(
-			nightmare : Nightmare, 
-			conf?: {
-				profileId: string
-			}
-		): Promise<number>,
 	authPage(nightmare : Nightmare, email: string, password: string): Promise<{}>,
 	getPerson(nightmare : Nightmare) : Promise<Person>
-	getAlbum(nightmare : Nightmare) : Promise<Album>
-	getComment(nightmare : Nightmare) : Promise<Comment>
+	getAlbum(nightmare : Nightmare) : Promise<Album[]>
+	getComment(nightmare : Nightmare) : Promise<Comment[]>
 	getContact(nightmare : Nightmare) : Promise<Contact>
-	getGroup(nightmare : Nightmare) : Promise<Group>
-	getPhoto(nightmare : Nightmare) : Promise<Photo>
+	getGroup(nightmare : Nightmare) : Promise<Group[]>
+	getPhoto(nightmare : Nightmare) : Promise<Photo[]>
 	getPhotoTag(nightmare : Nightmare) : Promise<PhotoTag>
-	getPost(nightmare : Nightmare) : Promise<Post>
+	getPost(nightmare : Nightmare) : Promise<Post[]>
 	getRelative(nightmare : Nightmare) : Promise<Relative>
 }
 export default class Facebook implements IFacebook {
+	profile: () => Nightmare;
+	id: string;
+	numberId: number;
+	private gotoProfilePage =  (nightmare: Nightmare) => ( id: string ) => nightmare.goto(`https://www.facebook.com/${id}`).wait('#fbTimelineHeadline');
+	private gotoPageForProfile: () => (page: MainNav) => Nightmare;
+	public constructor(nightmare: Nightmare, id: string = "halit.eraslan.731", numberId: number= 100025424408094){
+		this.id = id;
+		this.profile = () => this.gotoProfilePage(nightmare)(id);//profile.php?id=100009374775830 //https://www.facebook.com/huan.lu.5099 //raja.sirhatti.52
+		this.gotoPageForProfile =  () => gotoPageFor(this.profile());
+	}
 	getPerson(nightmare: Nightmare): Promise<Person> {
-		const gotoProfilePage =  (nightmare: Nightmare) => ( id: string ) => nightmare.goto(`https://www.facebook.com/${id}`).wait('#fbTimelineHeadline')
-		const profile = gotoProfilePage(nightmare)("raja.sirhatti.52");//profile.php?id=100009374775830 //https://www.facebook.com/huan.lu.5099
-		const gotoPageForProfile =  gotoPageFor(profile);
-
 		let chain = Promise.resolve(()=> Promise.resolve()) as any;
 		
 		let results:any[] = [];
-		//LifeEvents,ContactandBasicInfo,
-		const actions = [PostPages, (_: any) => ()=>"end"];
+		const actions = [LifeEvents,ContactandBasicInfo, (_: any) => ()=>"end"];
 			actions
-			.map((x: (_: any) => any) => x(gotoPageForProfile))
+			.map((x: (_: any) => any) => x(this.gotoPageForProfile()))
 			.map((e: () => Promise<any>)=> {
 				chain = chain.then((past: () => Promise<any>)=>{
 					return past().then((data: any)=>{
@@ -116,92 +111,51 @@ export default class Facebook implements IFacebook {
 					});
 				});
 			});
-			console.info("sss");
-			chain
-			.then((data: any)=>{
-				results.push(data);
-				console.log("results");
-				console.log(results);
-			})
-			.catch((e: any)=>{
-				console.log("catch",e);
-				nightmare.end().then(console.log);
-				
-				//logger.error('Ошибка xx: ', e);
+			
+		return chain.then((data: any)=>results);
+	}
+	getAlbum(nightmare: Nightmare): Promise<Album[]> {
+		return PhotosPages(this.gotoPageForProfile())(EPhotosTabs.Albums)().then<Album[]>( (y: any) => {
+			return (y as TAlbum[]).map( (x: any) => {
+				return {
+					...x
+				} as Album;
 			});
-		throw new Error("Method not implemented.");
+		});
 	}
-	getAlbum(nightmare: Nightmare): Promise<Album> {
-		throw new Error("Method not implemented.");
-	}
-	getComment(nightmare: Nightmare): Promise<Comment> {
+	getComment(nightmare: Nightmare): Promise<Comment[]> {
 		throw new Error("Method not implemented.");
 	}
 	getContact(nightmare: Nightmare): Promise<Contact> {
 		throw new Error("Method not implemented.");
 	}
-	getGroup(nightmare: Nightmare): Promise<Group> {
+	getGroup(nightmare: Nightmare): Promise<Group[]> {
 		throw new Error("Method not implemented.");
 	}
-	getPhoto(nightmare: Nightmare): Promise<Photo> {
-		throw new Error("Method not implemented.");
+	getPhoto(nightmare: Nightmare): Promise<Photo[]> {
+		return PhotosPages(this.gotoPageForProfile())(EPhotosTabs.PhotosOf)().then<Photo[]>( (y: any) => {
+			return (y as TPhotoPage[]).map( (x: any) => {
+				return {
+					...x
+				} as Photo;
+			});
+		});
 	}
 	getPhotoTag(nightmare: Nightmare): Promise<PhotoTag> {
 		throw new Error("Method not implemented.");
 	}
-	getPost(nightmare: Nightmare): Promise<Post> {
-		throw new Error("Method not implemented.");
+	getPost(nightmare: Nightmare): Promise<Post[]> {
+		return PostPages(this.gotoPageForProfile(), this.numberId)().then( (y: any) => {
+			return (y as TPostPage[]).map( (x: any) => {
+				return {
+					...x
+				} as Post;
+			});
+		});
 	}
 	getRelative(nightmare: Nightmare): Promise<Relative> {
 		throw new Error("Method not implemented.");
 	}
-	goToPage(
-		nightmare : Nightmare, 
-		id: string | number, 
-		conf?: {
-			rootUrl: string,
-			profileRoute: string
-		}
-	) {
-		let config = {
-			rootUrl: 'https://www.facebook.com/',
-			profileRoute: 'profile.php',
-			...conf
-		}
-		let queryUrl = config.rootUrl;
-		switch (typeof(id)) {
-			case 'string':
-				queryUrl += id;
-				break;
-			case 'number':
-				queryUrl += config.profileRoute + '?id=' + id;
-				break;
-			default:
-				throw new TypeError(`Тип аргумента: ${typeof(id)}. Требуется string или number.`)
-		}
-		console.log("queryUrl:",queryUrl);
-		nightmare.goto(queryUrl);
-	}
-
-	getUserIdByPage(
-		nightmare : Nightmare, 
-		conf?: {
-			profileId: string
-		}
-	): Promise<number> {
-		let config = {
-			profileId: 'referrer_profile_id',
-			...conf
-		}
-		const selector = `[href*="${config.profileId}"]`;
-		return nightmare
-			.wait(selector)
-			.then((result)=> {
-				const href = (document.querySelector(selector) as HTMLLinkElement).href;
-				return parseInt(href.split(`${config.profileId}=`).pop(), 10);
-			});
-	}
-	
 	authPage(nightmare : Nightmare, email: string, password: string): Promise<{}> {
 		return new Promise((resolve, reject) => {
 			console.log("e");
@@ -240,5 +194,52 @@ export default class Facebook implements IFacebook {
 					reject(e);
 				});
 		});
+	}
+
+	private goToPage(
+		nightmare : Nightmare, 
+		id: string | number, 
+		conf?: {
+			rootUrl: string,
+			profileRoute: string
+		}
+	) {
+		let config = {
+			rootUrl: 'https://www.facebook.com/',
+			profileRoute: 'profile.php',
+			...conf
+		}
+		let queryUrl = config.rootUrl;
+		switch (typeof(id)) {
+			case 'string':
+				queryUrl += id;
+				break;
+			case 'number':
+				queryUrl += config.profileRoute + '?id=' + id;
+				break;
+			default:
+				throw new TypeError(`Тип аргумента: ${typeof(id)}. Требуется string или number.`)
+		}
+		console.log("queryUrl:",queryUrl);
+		nightmare.goto(queryUrl);
+	}
+
+	private getUserIdByPage(
+		nightmare : Nightmare, 
+		conf?: {
+			profileId: string
+		}
+	): Promise<number> {
+		let config = {
+			profileId: 'referrer_profile_id',
+			...conf
+		}
+		const selector = `[href*="${config.profileId}"]`;
+		return nightmare
+			.wait(selector)
+			.then((result)=> {
+				const href = (document.querySelector(selector) as HTMLLinkElement).href;
+				return parseInt(href.split(`${config.profileId}=`).pop(), 10);
+			});
 	}
 }

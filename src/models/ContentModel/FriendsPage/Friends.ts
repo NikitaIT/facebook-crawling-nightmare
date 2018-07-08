@@ -8,6 +8,9 @@ export enum EFriendsTabs{
     RecentlyAdded = "Recently Added",
     Following = "Following",
     Birthdays = "Birthdays",
+    CurrentCity = "Current City",
+    Work = "Work",
+    Hometown = "Hometown",
 }
 export type TFriend = {
     id: number;
@@ -33,7 +36,7 @@ type TFasebookDataGT = {
     coeff2_pv_signature:string
 };
 type TFriendsCount = { [name: string]: number | undefined };
-type TFriendsPage = { friends: TFriend[], friendsCount: TFriendsCount };
+export type TFriendsPage = { friends: TFriend[], friendsCount: TFriendsCount };
 type TCardData = TFriend & { dataGt: string; }
 type TFriendsTabsText = { [friendsTabValue: string]: string } 
 type TFriendsContent = { cardData: TCardData[], friendsTabsText: TFriendsTabsText }

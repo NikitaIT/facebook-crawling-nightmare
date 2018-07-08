@@ -1,5 +1,5 @@
 import { TGotoPageForProfile, MainNav } from "../Nav";
-type TPostPage = {
+export type TPostPage = {
     extraData?:Text,//.userContent
     replyOwnerId?:string, // 
     commentsCount?:number,
@@ -29,11 +29,10 @@ type TPostPage = {
     linkImage?:string
 }
 class DataSelector{
-    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => ()  : Promise<TPostPage[]> => {
+    public static run = ( gotoPageForProfile: TGotoPageForProfile, id: number ) => ()  : Promise<TPostPage[]> => {
         const   selector:string  = `.userContent`,
                 selectorSection:string = `.userContentWrapper`,
-                nm = gotoPageForProfile(MainNav.Timeline).wait(1000),
-                id = 100025424408094;
+                nm = gotoPageForProfile(MainNav.Timeline).wait(1000);
 
         
         return  new Promise((resolve,reject) =>{
@@ -54,7 +53,7 @@ class DataSelector{
             .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
                 if(x === true){
                     nm
-                    .evaluate(DataSelector.evaluator,id)
+                    .evaluate(DataSelector.postEvaluator,id)
                     //.then(DataSelector.mapper)
                     .then((c:TPostPage[])=> (console.log(c),resolve(c)))
                     .catch(console.error)
@@ -63,32 +62,32 @@ class DataSelector{
             )
         });
     };
-    private static evaluator(id: number) : TPostPage[]{
+    private static postEvaluator(id: number) : TPostPage[]{
         const   wrapper = Array.from(document.querySelectorAll<HTMLImageElement>(`.userContentWrapper`));
         
         return wrapper.map((x) : TPostPage=> {
                 const   _uC = x.querySelector<HTMLDivElement>(".userContent"),
                         postHeader = _uC && _uC.previousElementSibling,
                         postsHrefs = postHeader && postHeader.querySelectorAll<HTMLLinkElement>(`a[href*="/posts/"]`),
-                        _pH = postsHrefs[postsHrefs.length > 1 ? 1 : 0],
+                        _pH = postsHrefs && postsHrefs[postsHrefs.length > 1 ? 1 : 0],
                         url = _pH && _pH.href,
                         sharedA = postsHrefs && postsHrefs.length > 1 && postsHrefs[0] && postsHrefs[0].href,//не совсем правильно, шарить можно все что угодно
-                        allAfterDate = postHeader.querySelectorAll<HTMLLinkElement>(`span[role="presentation"] ~ a`),
+                        allAfterDate = postHeader && postHeader.querySelectorAll<HTMLLinkElement>(`span[role="presentation"] ~ a`),
                         place = allAfterDate && allAfterDate[0] && allAfterDate[0].href as any as Text,// или текст?
                         querySelectors = {
-                            extraData: x.querySelector<HTMLDivElement>(".userContent"),
-                            commentsCount: x.querySelector<HTMLLinkElement>(`form a[aria-live="polite"][href*="${"comment"}"]`),
-                            repostsCount: x.querySelector<HTMLLinkElement>(`form a[aria-live="polite"][href*="${"shares"}"]`),
+                            extraData: x && x.querySelector<HTMLDivElement>(".userContent"),
+                            commentsCount:  x && x.querySelector<HTMLLinkElement>(`form a[aria-live="polite"][href*="${"comment"}"]`),
+                            repostsCount: x &&  x.querySelector<HTMLLinkElement>(`form a[aria-live="polite"][href*="${"shares"}"]`),
                             feedCount: {
-                                likes: x.querySelector<HTMLLinkElement>('form a[aria-label*="Like"]'),
-                                love: x.querySelector<HTMLLinkElement>('form a[aria-label*="Love"]'),
-                                wow: x.querySelector<HTMLLinkElement>('form a[aria-label*="Wow"]')
+                                likes:  x && x.querySelector<HTMLLinkElement>('form a[aria-label*="Like"]'),
+                                love:  x && x.querySelector<HTMLLinkElement>('form a[aria-label*="Love"]'),
+                                wow:  x && x.querySelector<HTMLLinkElement>('form a[aria-label*="Wow"]')
                             },
                             quotedPost: {
-                                Id: x.querySelector<HTMLLinkElement>(`.userContentWrapper [ajaxify*="/follow/"]`),
-                                value: x.querySelector<HTMLLinkElement>(`.userContentWrapper [ajaxify*="/follow/"]`)
+                                Id:  x && x.querySelector<HTMLLinkElement>(`.userContentWrapper [ajaxify*="/follow/"]`),
+                                value:  x && x.querySelector<HTMLLinkElement>(`.userContentWrapper [ajaxify*="/follow/"]`)
                             },
-                            linkImage: x.querySelector<HTMLImageElement>(`a[rel="theater"][href*="${id}"] img`),
+                            linkImage:  x && x.querySelector<HTMLImageElement>(`a[rel="theater"][href*="${id}"] img`),
                         };
                 return {
                     extraData: querySelectors.extraData && querySelectors.extraData.textContent as any as Text,
@@ -117,7 +116,7 @@ class DataSelector{
                     url: url,
                     place: place,
                     date: (() => {
-                        var _q : any = postHeader.querySelector<HTMLLinkElement>("abbr");
+                        var _q : any = postHeader && postHeader.querySelector<HTMLLinkElement>("abbr");
                         _q = _q && _q.title;
                         _q  = _q && Date.parse(_q.replace('pm', ":00 pm").replace('am', ":00 am"));
                         _q  = _q && new Date(_q);
@@ -131,4 +130,5 @@ class DataSelector{
         }
     }
 }
+
 export const PostPages = DataSelector.run
