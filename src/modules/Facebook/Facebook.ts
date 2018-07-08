@@ -18,6 +18,7 @@ import * as Nightmare from 'nightmare';
 import { PostPages, TPostPage } from '../../models/ContentModel/RootPage/Posts';
 import { PhotosPages, TAlbum, TPhotoPage } from '../../models/ContentModel/PhotosPage/Photos';
 import { EPhotosTabs } from '../../models/ContentModel/PhotosPage/PhotosTabs';
+import { chainPromiseFn } from '../../utils/utils';
 
 type Person1 = {
     id:string,
@@ -97,22 +98,7 @@ export default class Facebook implements IFacebook {
 		this.gotoPageForProfile =  () => gotoPageFor(this.profile());
 	}
 	getPerson(nightmare: Nightmare): Promise<Person> {
-		let chain = Promise.resolve(()=> Promise.resolve()) as any;
-		
-		let results:any[] = [];
-		const actions = [LifeEvents,ContactandBasicInfo, (_: any) => ()=>"end"];
-			actions
-			.map((x: (_: any) => any) => x(this.gotoPageForProfile()))
-			.map((e: () => Promise<any>)=> {
-				chain = chain.then((past: () => Promise<any>)=>{
-					return past().then((data: any)=>{
-						results.push(data);
-						return ()=>e();
-					});
-				});
-			});
-			
-		return chain.then((data: any)=>results);
+		return chainPromiseFn([LifeEvents,ContactandBasicInfo].map((x: (_: any) => any) => x(this.gotoPageForProfile())));
 	}
 	getAlbum(nightmare: Nightmare): Promise<Album[]> {
 		return PhotosPages(this.gotoPageForProfile())(EPhotosTabs.Albums)().then<Album[]>( (y: any) => {
