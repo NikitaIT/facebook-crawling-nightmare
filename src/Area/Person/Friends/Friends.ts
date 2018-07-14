@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { MainNav, TGotoPageForProfile } from '../Nav';
+import { MainNav, TGotoPageForProfile } from '../../Nav';
 import { findEndSubstring } from '../../../utils/utils';
 //#pagelet_timeline_medley_friends //[name="All Friends"] 
 export enum EFriendsTabs{

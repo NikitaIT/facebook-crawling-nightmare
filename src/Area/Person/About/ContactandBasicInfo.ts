@@ -1,5 +1,5 @@
 import { AboutTabs, gotoTabOn } from './AboutTabs';
-import { MainNav, TGotoPageForProfile } from '../Nav';
+import { MainNav, TGotoPageForProfile } from '../../Nav';
 import { findEndSubstring } from '../../../utils/utils';
 type Gender = "Mail"|"Female"|"Custom";
 export type InterestedIn = "Women"| "Men";

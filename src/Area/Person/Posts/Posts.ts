@@ -1,4 +1,5 @@
-import { TGotoPageForProfile, MainNav } from "../Nav";
+import { TGotoPageForProfile, MainNav } from "../../Nav";
+
 export type TPostPage = {
     extraData?:Text,//.userContent
     replyOwnerId?:string, // 

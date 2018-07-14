@@ -1,5 +1,5 @@
 import { AboutTabs, gotoTabOn } from './AboutTabs';
-import { MainNav, TGotoPageForProfile } from '../Nav';
+import { MainNav, TGotoPageForProfile } from '../../Nav';
 import { findEndSubstring } from '../../../utils/utils';
 export type LifeEvents = {
 	Birthdate: Date,

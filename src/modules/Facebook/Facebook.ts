@@ -10,15 +10,14 @@ import { Photo } from '../../models/Entity/Photo';
 import { PhotoTag } from '../../models/Entity/PhotoTag';
 import { Post } from '../../models/Entity/Post';
 import { Relative } from '../../models/Entity/Relative';
-import { gotoPageFor, MainNav } from '../../models/ContentModel/Nav';
-import { LifeEvents } from '../../models/ContentModel/AboutPage/LifeEvents';
-import { Friends } from '../../models/ContentModel/FriendsPage/Friends';
-import { ContactandBasicInfo } from '../../models/ContentModel/AboutPage/ContactandBasicInfo';
 import * as Nightmare from 'nightmare';
-import { PostPages, TPostPage } from '../../models/ContentModel/RootPage/Posts';
-import { PhotosPages, TAlbum, TPhotoPage } from '../../models/ContentModel/PhotosPage/Photos';
-import { EPhotosTabs } from '../../models/ContentModel/PhotosPage/PhotosTabs';
 import { chainPromiseFn } from '../../utils/utils';
+import { MainNav, gotoPageFor } from '../../Area/Nav';
+import { ContactandBasicInfo } from '../../Area/Person/About/ContactandBasicInfo';
+import { LifeEvents } from '../../Area/Person/About/LifeEvents';
+import { PhotosPages, TAlbum, TPhotoPage } from '../../Area/Person/Photos/Photos';
+import { EPhotosTabs } from '../../Area/Person/Photos/PhotosTabs';
+import { TPostPage, PostPages } from '../../Area/Person/Posts/Posts';
 
 type Person1 = {
     id:string,

@@ -1,7 +1,6 @@
-import { TGotoPageForProfile, MainNav, gotoPageFor } from "../Nav";
+import { TGotoPageForProfile, MainNav, gotoPageFor } from "../../Nav";
 import * as Nightmare from "nightmare";
 import { gotoTabOn, EPhotosTabs } from "./PhotosTabs";
-import { getBase64Image, chainPromiseFn } from "../../../utils/utils";
 export type TPhotoPage = TPhotoPopup & {
     id?:number,
     albumId?:string,
