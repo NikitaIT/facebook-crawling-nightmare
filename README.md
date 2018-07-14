@@ -9,7 +9,7 @@ cd facebook-crawling-nightmare
 npm install
 ```
 
-Далее необходимо заменить типы node_modules/nightmare на те что в проекте @types/nightmare.(из-за того что неймспейс nightmare называется как класс, переопределение настроить не удалось)
+Далее необходимо заменить типы node_modules/@types/nightmare на те что в проекте @types/nightmare.(из-за того что неймспейс nightmare называется как класс, переопределение настроить не удалось)
 
 ```bash
 # Run the app

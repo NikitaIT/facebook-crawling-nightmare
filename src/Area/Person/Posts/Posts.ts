@@ -104,25 +104,23 @@ class DataSelector{
                             .attributes["ajaxify" as any].value
                             .match(/profile_id=(\d+)/)[1]
                             || "0",10),
-                        value: (() => {
-                            var _q : any = querySelectors.quotedPost.value;
-                            _q = _q && _q.parentElement;
-                            _q  = _q && _q.querySelector("p");
-                            _q  = _q && _q.textContent;
-                            return _q;
-                        })()
+                        value: ((_ : any) => {
+                            _ = _ && _.parentElement;
+                            _  = _ && _.querySelector("p");
+                            _  = _ && _.textContent;
+                            return _;
+                        })(querySelectors.quotedPost.value)
                     },
                     lang: null,
                     linkImage: querySelectors.linkImage && querySelectors.linkImage.src,
                     url: url,
                     place: place,
-                    date: (() => {
-                        var _q : any = postHeader && postHeader.querySelector<HTMLLinkElement>("abbr");
-                        _q = _q && _q.title;
-                        _q  = _q && Date.parse(_q.replace('pm', ":00 pm").replace('am', ":00 am"));
-                        _q  = _q && new Date(_q);
-                        return _q;
-                    })(),
+                    date: ((_ : any) => {
+                        _ = _ && _.title;
+                        _  = _ && Date.parse(_.replace('pm', ":00 pm").replace('am', ":00 am"));
+                        _  = _ && new Date(_);
+                        return _;
+                    })(postHeader && postHeader.querySelector<HTMLLinkElement>("abbr")),
                 }
         });
     };

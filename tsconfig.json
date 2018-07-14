@@ -2,7 +2,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "esnext",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors":false,
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": "./",
