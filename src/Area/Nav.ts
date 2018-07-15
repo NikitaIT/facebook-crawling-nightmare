@@ -7,6 +7,10 @@ export enum MainNav{
 	Photos = "photos",
 	More = "", //wtf last-child
 }
+/**
+ * Могут быть кастомные пункты
+ * Instagram= "124024574287414"
+ */
 export enum SubNav{
 	Videos= "videos",
 	CheckIns= "map",
@@ -20,8 +24,7 @@ export enum SubNav{
 	Events= "events",
 	Questions= "did_you_know",
 	Reviews= "reviews",
-	Notes= "notes",
-	Instagram= "124024574287414" //wtf last-child
+	Notes= "notes"
 }
 const NavSelector = "a[data-tab-key*='{0}']";
 export const gotoPageFor = (profile: Nightmare) => (page: MainNav) => profile.click(`a[data-tab-key*="${page}"]`);

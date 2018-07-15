@@ -35,3 +35,6 @@ export const chainPromiseFn = (actions: (() => Promise<any>)[]): Promise<any> =>
 		});
 	return chain.then(()=> results)
 }
+export function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
