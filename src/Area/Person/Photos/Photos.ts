@@ -60,7 +60,7 @@ class DataSelector{
                             },1000);
                         });
                     },selectorSection),
-                gotoTab = (tab: EPhotosTabs) => scrollImagesOn((console.log(tab),gotoTabOn(photosPage)(tab))),
+                gotoTab = (tab: EPhotosTabs) => scrollImagesOn(gotoTabOn(photosPage)(tab)),
                 getData = <T = TAlbum|TPhotoPage>(tab: EPhotosTabs) => 
                 (): Promise<T[]>  => new Promise((resolve,reject) =>{
                     gotoTab(tab)

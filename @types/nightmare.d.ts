@@ -31,7 +31,10 @@ declare class Nightmare {
 	evaluate<T1, T2, T3,R>(fn: (v1:T1, v2:T2, v3:T3) => R, v1:T1, v2:T2, v3:T3): Nightmare;
 	wait(ms: number): Nightmare;
 	wait(selector: string): Nightmare;
-	wait<T>(fn: (...values: T[]) => boolean, ...values: T[]): Nightmare;
+	wait(selector: string,ms: number): Nightmare;
+	wait<T1>(fn: (v1:T1) => boolean, v1: T1): Nightmare;
+	wait<T1, T2>(fn: (v1:T1, v2:T2) => boolean, v1:T1, v2:T2): Nightmare;
+	wait<T1, T2, T3>(fn: (v1:T1, v2:T2, v3:T3) => boolean, v1:T1, v2:T2, v3:T3): Nightmare;
 	header(header: string, value: string): Nightmare;
 	exists(selector: string): Nightmare;
 	visible(selector: string): Nightmare;

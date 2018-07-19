@@ -86,6 +86,7 @@ export const solveCheckpointBlock = (errorPage: Nightmare) =>
              }
              return errorPage;
         })
+        .then(resolve)
         .catch(console.error)
         .finally(() => reject())
     ));

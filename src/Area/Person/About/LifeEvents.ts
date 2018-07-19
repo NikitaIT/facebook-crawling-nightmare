@@ -30,18 +30,16 @@ export const LifeEvents  = (gotoPageForProfile: TGotoPageForProfile ) => () : Pr
 				return x.innerText;
 			});
 		})
-		.then((lifeEvents: string[])=>{
-			lifeEvents.map(console.log);
-			const ss: LifeEvents = {
-				Birthdate: new Date(findEndSubstring(lifeEvents,LifeEventsTypes.Birthdate)),
-				School: findEndSubstring(lifeEvents,LifeEventsTypes.School),
-				Graduated: findEndSubstring(lifeEvents,LifeEventsTypes.Graduated),
-				Married: lifeEvents.find(x => x == LifeEventsTypes.Married) == LifeEventsTypes.Married,
-				TraveledTo: findEndSubstring(lifeEvents,LifeEventsTypes.TraveledTo),
-				WorkedAt: findEndSubstring(lifeEvents,LifeEventsTypes.WorkedAt),
-				MovedTo: findEndSubstring(lifeEvents,LifeEventsTypes.MovedTo)
+		.then((lifeEventsStrings: string[])=>{
+			const lifeEvents: LifeEvents = {
+				Birthdate: new Date(findEndSubstring(lifeEventsStrings,LifeEventsTypes.Birthdate)),
+				School: findEndSubstring(lifeEventsStrings,LifeEventsTypes.School),
+				Graduated: findEndSubstring(lifeEventsStrings,LifeEventsTypes.Graduated),
+				Married: lifeEventsStrings.find(x => x == LifeEventsTypes.Married) == LifeEventsTypes.Married,
+				TraveledTo: findEndSubstring(lifeEventsStrings,LifeEventsTypes.TraveledTo),
+				WorkedAt: findEndSubstring(lifeEventsStrings,LifeEventsTypes.WorkedAt),
+				MovedTo: findEndSubstring(lifeEventsStrings,LifeEventsTypes.MovedTo)
 			};
-			console.log(ss);
-			return (ss);
+			return lifeEvents;
 		});
 };

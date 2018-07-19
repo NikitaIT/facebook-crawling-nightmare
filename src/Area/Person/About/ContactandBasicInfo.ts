@@ -49,8 +49,7 @@ export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) =>
 			});
 		})
 		.then((rows: string[])=>{
-			rows.map(console.log);
-			const ss: ContactandBasicInfo = {
+			const contactandBasicInfo: ContactandBasicInfo = {
 				BirthDate: new Date(findEndSubstring(rows, "Birthday")),
 				BirthYear: new Date(findEndSubstring(rows, "Birthday")).getFullYear(),
 				NameDay: new Date(findEndSubstring(rows, "Name Day")),
@@ -72,7 +71,7 @@ export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) =>
 					value: "string"
 				}]
 			}
-			return (ss);
+			return contactandBasicInfo;
 		});
 	};
 	

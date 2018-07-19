@@ -18,55 +18,7 @@ import { LifeEvents } from '../../Area/Person/About/LifeEvents';
 import { PhotosPages, TAlbum, TPhotoPage } from '../../Area/Person/Photos/Photos';
 import { EPhotosTabs } from '../../Area/Person/Photos/PhotosTabs';
 import { TPostPage, PostPages } from '../../Area/Person/Posts/Posts';
-
-type Person1 = {
-    id:string,
-    extraData:Text,
-    screenName:string,
-    firstName:string,
-    lastName:string,
-    middleName:string,
-    maidenName:string,
-    name:string,
-    //birthdate:Date,
-    country:Text,
-    region:Text,
-    city:Text,
-    gender:string,
-    position:string,
-    phone:string,
-    phoneHome:string,
-    deleted:boolean,
-    lastSeenDate:Date,
-    lastUpdateDate:Date,
-    dateUpdated:Date,
-    platform:string,
-    registeredDate:Date,
-    homePage:string,
-    homePageName:string,
-    description:string,
-    verified:boolean,
-    status:string,
-    url:string,
-    postCount:number,
-    favoritesCount:number,
-    friendsCount:number,
-    followersCount:number,
-    groupMembersCount:number,
-    address:string,
-    location:Text,
-    premium:boolean,
-    private_:boolean,
-    statusDate:Date,
-    photo:string,
-    photoSmall:string,
-    photoMedium:string,
-    photoLarge:string,
-    email:string,
-    relationship:string
-}
-
-
+import * as moment from 'moment';
 
 enum Search{
 	Name ="#fb-timeline-cover-name"
@@ -143,7 +95,6 @@ export default class Facebook implements IFacebook {
 	}
 	authPage(nightmare : Nightmare, email: string, password: string): Promise<{}> {
 		return new Promise((resolve, reject) => {
-			console.log("e");
 			nightmare.goto('https://www.facebook.com/login/')
 				.evaluate(() => {
 					const checker = document.querySelector('#email');
@@ -154,12 +105,37 @@ export default class Facebook implements IFacebook {
 						nightmare.insert('#email', email)
 							.insert('#pass', password)
 							.click('#loginbutton')
-							.wait(10000)//'#userNavigationLabel',
+							.wait('#userNavigationLabel', 10000)
 							.cookies.get()
 							.then((cookies : [Nightmare.ICookie]) => {
-								if (cookies) {
-									resolve(cookies.slice());
-								}
+								nightmare
+									.wait(2000)
+									.evaluate(()=>{
+										/**
+										 * https://github.com/shivamgoswami757/Facebook-Phishing-Page/blob/master/desktop_files/desktop_files/VRRdhgO5aYh.js.download
+										 * 
+										 * www_card_selector_more не играет роли в выставлении языка(скорее всего он чтобы трэкать источник)
+										 */
+										const setAccauntLocaleUnsafe = () => {
+											eval(`require("IntlUtils").setLocale(null, "www_card_selector_more", "en_US");`);
+											// можно сделать это по другому
+											//eval(`intl_set_locale(null, "www_card_selector", "en_US");`);
+										}
+										setAccauntLocaleUnsafe();
+									})
+									.wait(2000)
+									.then(()=>{
+										moment.locale('en-US');
+										if (cookies) {
+											resolve(cookies.slice());
+										}
+									})
+									.catch((e : any) => {
+										nightmare.end().then(console.log);
+										console.log(e);
+										//logger.error('Ошибка при входе на страницу: ', e);
+										reject(e);
+									});
 							})
 							.catch((e : any) => {
 								nightmare.end().then(console.log);
