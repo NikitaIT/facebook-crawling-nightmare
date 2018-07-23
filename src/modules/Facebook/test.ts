@@ -6,21 +6,35 @@ import Facebook from './Facebook';
 import { testConfig } from '../../config/test.config';
 import { PostsTestData } from '../../Area/Person/Posts/TestData';
 import { Automapper } from '../../infrastructure/Automapper';
-import { PhotosTestData } from '../../Area/Person/Photos/TestData';
+import { PhotosTestData, AlbumsTestData } from '../../Area/Person/Photos/TestData';
 
 
-describe('Fasebook', function() {
+describe('Facebook', function() {
   this.timeout(135000);
   const facebook = new Facebook(nightmare, testConfig.shortName),
         app = facebook.authPage(nightmare, auth.email, auth.password);
-  
+  describe('getAlbum function', function() {
+    it('should return AlbumsTestData', (done) => {
+      app.then((e: any)=>{
+        return facebook.getAlbum(nightmare);
+      })
+      .then(x=>{
+          console.log(x);
+            expect(x).be.equal(AlbumsTestData.map(Automapper.mapToAlbum.FromTAlbumPage));
+            done();
+          })
+      .catch((error) => {
+          done(error);
+      });
+    });
+  });
   describe('getPost function', function() {
-    it('should redirect to Person page if send short name', (done) => {
+    it('should return PostsTestData', (done) => {
       app.then((e: any)=>{
         return facebook.getPost(nightmare);
       })
       .then(x=>{
-            expect(x).be.equal(PostsTestData.map(Automapper.mapPostPageToPosts));
+            expect(x).be.equal(PostsTestData.map(Automapper.mapToPost.FromTPostPage));
             done();
           })
       .catch((error) => {
@@ -29,12 +43,12 @@ describe('Fasebook', function() {
     });
   });
   describe('getPhotos function', function() {
-    it('should redirect to Person page if send short name', (done) => {
+    it('should return PhotosTestData', (done) => {
       app.then((e: any)=>{
         return facebook.getPhoto(nightmare);
       })
       .then(x=>{
-            expect(x).be.equal(PhotosTestData.map(Automapper.mapPhotoPageToPhotos));
+            expect(x).be.equal(PhotosTestData.map(Automapper.mapToPhoto.FromTPhotoPage));
             done();
           })
       .catch((error) => {
@@ -42,4 +56,5 @@ describe('Fasebook', function() {
       });
     });
   });
+  
 });

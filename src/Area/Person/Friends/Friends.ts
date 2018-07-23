@@ -136,11 +136,6 @@ class DataSelector{
 
         Object.entries(friendsContent.friendsTabsText).map(toFriendsCount);
 
-        console.log(
-            "friends: ",
-            friends,
-            friendsCount
-        );
         return {
             friends,
             friendsCount

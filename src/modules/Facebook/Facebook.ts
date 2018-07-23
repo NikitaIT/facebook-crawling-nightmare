@@ -53,13 +53,18 @@ export default class Facebook implements IFacebook {
 			[LifeEvents,ContactandBasicInfo]
 			.map((x: (_: any) => any) => x(this.gotoPageForProfile()))
 		)
-		.then((x: [TLifeEvents,TContactandBasicInfo])=>x as any as Person);
+		.then((x: [TLifeEvents,TContactandBasicInfo])=>
+			Automapper.smartAssign(
+				Automapper.mapToPerson.FromTLifeEvents(x[0]),
+				Automapper.mapToPerson.FromTContactandBasicInfo(x[1]),
+			)
+		);
 	}
 	getAlbum(nightmare: Nightmare): Promise<Album[]> {
 		return PhotosPages(this.gotoPageForProfile())
 		(EPhotosTabs.Albums)
 		<TAlbumPage>()
-		.then( y => y.map<Album>( Automapper.mapAlbumPageToAlbums ));
+		.then( y => y.map<Album>( Automapper.mapToAlbum.FromTAlbumPage ));
 	}
 	getComment(nightmare: Nightmare): Promise<Comment[]> {
 		throw new Error("Method not implemented.");
@@ -74,14 +79,14 @@ export default class Facebook implements IFacebook {
 		return PhotosPages(this.gotoPageForProfile())
 				(EPhotosTabs.PhotosOf)
 				<TPhotoPage>()
-				.then( y => y.map<Photo>( Automapper.mapPhotoPageToPhotos ));
+				.then( y => y.map<Photo>( Automapper.mapToPhoto.FromTPhotoPage ));
 	}
 	getPhotoTag(nightmare: Nightmare): Promise<PhotoTag> {
 		throw new Error("Method not implemented.");
 	}
 	getPost(nightmare: Nightmare): Promise<Post[]> {
 		return PostPages(this.gotoPageForProfile())()
-				.then( y => y.map( Automapper.mapPostPageToPosts ));
+				.then( y => y.map( Automapper.mapToPost.FromTPostPage ));
 	}
 	getRelative(nightmare: Nightmare): Promise<Relative> {
 		throw new Error("Method not implemented.");

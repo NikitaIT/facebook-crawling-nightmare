@@ -41,26 +41,41 @@ export function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function scrollDown(nm: Nightmare, {selector = null,count = 0,previousHeight = -1, currentHeight = 0, maxIterationsCount = 1} = {}) {
+export function scrollDown(
+	nm: Nightmare, 
+	{
+		selector = null,
+		maxSelectorIterationsCount = 10,
+		selectorIterationsCount = 10,
+		previousSelectorIterationsCount = 10,
+		count = 0,
+		previousHeight = -1, 
+		currentHeight = 0, 
+		maxIterationsCount = 1
+	} = {}) {
 	return new Promise<Nightmare>((resolve,reject) =>{
 		if (previousHeight !== currentHeight && maxIterationsCount--) {
 			console.log(previousHeight, maxIterationsCount)
 			previousHeight = currentHeight;
 
-			return nm.evaluate(function (selector,count) {
+		return nm.evaluate(function (selector) {
+				return { currentHeight: document.body.scrollHeight, count: document.querySelectorAll(selector).length};
+			},selector)
+			.then(({currentHeight,currentCount}) => {
+				
 				if(selector){
 					let prevCount = count;
-					count = document.querySelectorAll(selector).length;
-                    if(count == prevCount){
-						return { currentHeight: document.body.scrollHeight, count, isEnd: true};
+					count = currentCount;
+					if(count === prevCount){
+						selectorIterationsCount--;
+						if(selectorIterationsCount === 0)
+							resolve(nm);
 					}
+					if(selectorIterationsCount === previousSelectorIterationsCount)
+						selectorIterationsCount = maxSelectorIterationsCount;
 				}
-				return { currentHeight: document.body.scrollHeight, count, isEnd: false};
-			},selector,count)
-			.then(({currentHeight,count,isEnd}) => {
-				if(isEnd){
-					resolve(nm);
-				}
+				previousSelectorIterationsCount = selectorIterationsCount;
+
 				resolve(scrollDown(
 					nm.scrollTo(currentHeight, 0).wait(3000),
 					{
@@ -68,7 +83,10 @@ export function scrollDown(nm: Nightmare, {selector = null,count = 0,previousHei
 						currentHeight,
 						maxIterationsCount,
 						selector,
-						count
+						count,
+						maxSelectorIterationsCount,
+						previousSelectorIterationsCount,
+						selectorIterationsCount
 					}
 				));
 			});
