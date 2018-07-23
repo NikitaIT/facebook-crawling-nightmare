@@ -46,21 +46,6 @@ class DataSelector{//TAlbum[]|TPhotoPage[]
         console.debug("run TPhotoPage")
         const   selectorSection:string = `a[href*="/media/set"]`,
                 photosPage = gotoPageForProfile(MainNav.Photos).wait(1000),
-                // scrollImagesOn = (nightmare: Nightmare) => 
-                //     nightmare.evaluate((selectorSection)=> {
-                //         return new Promise<boolean>((resolve,reject) =>{
-                //             let count = 0;
-                //             const timerId = setInterval( ()=> {
-                //                 let prevCount = count;
-                //                 count = document.querySelectorAll(selectorSection).length;
-                //                 if(count == prevCount){
-                //                     clearInterval(timerId);
-                //                     resolve(true);
-                //                 }
-                //                 window.scrollBy(0, 10000);
-                //             },1000);
-                //         });
-                //     },selectorSection),
                 gotoTab = (tab: EPhotosTabs) => scrollDown(gotoTabOn(photosPage)(tab),{selector: selectorSection}),
                 getData = (tab: EPhotosTabs) => 
                 <T = TAlbumPage|TPhotoPage>(): Promise<T[]>  => new Promise((resolve,reject) =>{
