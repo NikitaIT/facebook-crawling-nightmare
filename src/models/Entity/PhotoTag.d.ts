@@ -4,7 +4,7 @@ export type PhotoTag = {
     placerId:string,
     text:Text,
     title:string,
-    date:Date,
+    date:Date|string,
     userName:string,
     x:number,
     y:number,

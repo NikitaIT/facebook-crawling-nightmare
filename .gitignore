@@ -1,5 +1,5 @@
 dist/
-src/auth.json
+src/config/resource/auth.config.json
 # Logs
 logs
 *.log

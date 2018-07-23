@@ -1,3 +1,5 @@
+import * as Nightmare from 'nightmare';
+
 export const findNumberRegexp = "[+-]?([0-9]+([.|,][0-9]*)?|[.|,][0-9]+)";
 
 export function findEndSubstring(array: string[], startWith: string): string | undefined {
@@ -38,3 +40,39 @@ export const chainPromiseFn = (actions: (() => Promise<any>)[]): Promise<any> =>
 export function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function scrollDown(nm: Nightmare, {selector = null,count = 0,previousHeight = -1, currentHeight = 0, maxIterationsCount = 1} = {}) {
+	return new Promise<Nightmare>((resolve,reject) =>{
+		if (previousHeight !== currentHeight && maxIterationsCount--) {
+			console.log(previousHeight, maxIterationsCount)
+			previousHeight = currentHeight;
+
+			return nm.evaluate(function (selector,count) {
+				if(selector){
+					let prevCount = count;
+					count = document.querySelectorAll(selector).length;
+                    if(count == prevCount){
+						return { currentHeight: document.body.scrollHeight, count, isEnd: true};
+					}
+				}
+				return { currentHeight: document.body.scrollHeight, count, isEnd: false};
+			},selector,count)
+			.then(({currentHeight,count,isEnd}) => {
+				if(isEnd){
+					resolve(nm);
+				}
+				resolve(scrollDown(
+					nm.scrollTo(currentHeight, 0).wait(3000),
+					{
+						previousHeight,
+						currentHeight,
+						maxIterationsCount,
+						selector,
+						count
+					}
+				));
+			});
+		}
+		return resolve(nm);
+	});
+};

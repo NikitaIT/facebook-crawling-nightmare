@@ -1,97 +1,103 @@
 import { TGotoPageForProfile, MainNav } from "../../Nav";
+import { config, PostsConfig } from "./posts.config";
+import { getUserIdByPage } from "../../../utils/Facebook";
+import * as Nightmare from "nightmare";
+import { scrollDown } from "../../../utils/utils";
 
 export type TPostPage = {
-    extraData?:Text,//.userContent
+    extraData?: string,//.userContent
     replyOwnerId?:string, // 
     commentsCount?:number,
-    location?:Text,
-    date?:Date,
-    feedCount:{
-        likes?:number,
-        love?:number,
-        wow?:number,
+    location?:string,
+    date?:Date | string,
+    feedCount?:{
+        likes:number,
+        love:number,
+        wow:number,
     }
     reply?: {
         UserId:string,
         PostId:string,//ответ
     }
     lang?:string,//язык
-    place?:Text,//место
+    place?: string,//место
     quotedPost?: {
         Id:number, // тот кого цитирут
         value: string // цитата
     }
     repostsCount?:number,
     platform?:string,
-    text?:Text,
+    text?: string,
     url?:string,
     link?:string,
     linkName?:string,
     linkImage?:string
 }
-class DataSelector{
-    public static run = ( gotoPageForProfile: TGotoPageForProfile, id: number ) => ()  : Promise<TPostPage[]> => {
-        const   selector:string  = `.userContent`,
-                selectorSection:string = `.userContentWrapper`,
-                nm = gotoPageForProfile(MainNav.Timeline).wait(1000);
 
-        
+class DataSelector{
+    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => ()  : Promise<TPostPage[]> => {
+        const   gotoTimeline = gotoPageForProfile(MainNav.Timeline).wait(1000);
+
         return  new Promise((resolve,reject) =>{
-            nm.evaluate((selectorSection)=> {
-                return new Promise<boolean>((resolve,reject) =>{
-                    let count = 0;
-                    const timerId = setInterval( ()=> {
-                        let prevCount = count;
-                        count = document.querySelectorAll(selectorSection).length;
-                        if(count == prevCount){
-                            clearInterval(timerId);
-                            resolve(true);
-                        }
-                        window.scrollBy(0, 10000);
-                    },1000);
-                });
-            },selectorSection)
-            .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
-                if(x === true){
-                    nm
-                    .evaluate(DataSelector.postEvaluator,id)
-                    //.then(DataSelector.mapper)
-                    .then((c:TPostPage[])=> (console.log(c),resolve(c)))
-                    .catch(console.error)
-                }
-            }
+            scrollDown(gotoTimeline).then(n => 
+            getUserIdByPage(gotoTimeline)
+                .then(id => {
+                    console.log("id: ", id)
+                    gotoTimeline
+                    .wait(2000)
+                        .evaluate(DataSelector.postEvaluator, id, config)
+                        //.then(DataSelector.mapper)
+                        .then((c: TPostPage[]) => (console.log("cc",c), resolve(c)))
+                        .catch(console.error)
+                })
+                .catch(console.error)
             )
         });
     };
-    private static postEvaluator(id: number) : TPostPage[]{
-        const   wrapper = Array.from(document.querySelectorAll<HTMLImageElement>(`.userContentWrapper`));
+    static postEvaluator = (id: number,config: PostsConfig) : TPostPage[] => {
+        const   wrapper = Array.from(document.querySelectorAll<HTMLImageElement>(config.Wrapper.selector));
         
         return wrapper.map((x) : TPostPage=> {
-                const   _uC = x.querySelector<HTMLDivElement>(".userContent"),
-                        postHeader = _uC && _uC.previousElementSibling,
-                        postsHrefs = postHeader && postHeader.querySelectorAll<HTMLLinkElement>(`a[href*="/posts/"]`),
-                        _pH = postsHrefs && postsHrefs[postsHrefs.length > 1 ? 1 : 0],
-                        url = _pH && _pH.href,
-                        sharedA = postsHrefs && postsHrefs.length > 1 && postsHrefs[0] && postsHrefs[0].href,//не совсем правильно, шарить можно все что угодно
-                        allAfterDate = postHeader && postHeader.querySelectorAll<HTMLLinkElement>(`span[role="presentation"] ~ a`),
-                        place = allAfterDate && allAfterDate[0] && allAfterDate[0].href as any as Text,// или текст?
+                const   
+                        userContent = x.querySelector<HTMLDivElement>(config.UserContent.selector),
+                        postHeader = 
+                            (_ => _ && _.previousElementSibling)
+                            (userContent),
+                        postsHrefs = 
+                            (_ => _ && _.querySelectorAll<HTMLLinkElement>(config.PostsHrefs.selector))
+                            (postHeader),
+                            url = 
+                            ((_ : any ) => (
+                                _ = _ && _[_.length > 1 ? 1 : 0],
+                                _ && _.href
+                            ))
+                            (postsHrefs),
+                        sharedA = 
+                            (_=> _ && _.length > 1 && _[0] && _[0].href)
+                            (postsHrefs),//не совсем правильно, шарить можно все что угодно
+                        place = 
+                            ((_ : any ) => (
+                                _ = _ && _.querySelectorAll(config.Place.selector),
+                                _ && _[0] && _[0].href
+                            ))
+                            (postHeader),// или текст?
                         querySelectors = {
-                            extraData: x && x.querySelector<HTMLDivElement>(".userContent"),
-                            commentsCount:  x && x.querySelector<HTMLLinkElement>(`form a[aria-live="polite"][href*="${"comment"}"]`),
-                            repostsCount: x &&  x.querySelector<HTMLLinkElement>(`form a[aria-live="polite"][href*="${"shares"}"]`),
+                            extraData: x && x.querySelector<HTMLDivElement>(config.ExtraData.selector),
+                            commentsCount:  x && x.querySelector<HTMLLinkElement>(config.CommentsCount.selector),
+                            repostsCount: x &&  x.querySelector<HTMLLinkElement>(config.RepostsCount.selector),
                             feedCount: {
-                                likes:  x && x.querySelector<HTMLLinkElement>('form a[aria-label*="Like"]'),
-                                love:  x && x.querySelector<HTMLLinkElement>('form a[aria-label*="Love"]'),
-                                wow:  x && x.querySelector<HTMLLinkElement>('form a[aria-label*="Wow"]')
+                                likes:  x && x.querySelector<HTMLLinkElement>(config.FeedCount.Likes.selector),
+                                love:  x && x.querySelector<HTMLLinkElement>(config.FeedCount.Love.selector),
+                                wow:  x && x.querySelector<HTMLLinkElement>(config.FeedCount.Wow.selector)
                             },
                             quotedPost: {
-                                Id:  x && x.querySelector<HTMLLinkElement>(`.userContentWrapper [ajaxify*="/follow/"]`),
-                                value:  x && x.querySelector<HTMLLinkElement>(`.userContentWrapper [ajaxify*="/follow/"]`)
+                                Id:  x && x.querySelector<HTMLLinkElement>(config.QuotedPost.selector),
+                                value:  x && x.querySelector<HTMLLinkElement>(config.QuotedPost.selector)
                             },
-                            linkImage:  x && x.querySelector<HTMLImageElement>(`a[rel="theater"][href*="${id}"] img`),
-                        };
+                            linkImage:  x && x.querySelector<HTMLImageElement>(config.LinkImage.selector.replace("{id}",id.toString())),
+                        }; 
                 return {
-                    extraData: querySelectors.extraData && querySelectors.extraData.textContent as any as Text,
+                    extraData: querySelectors.extraData && querySelectors.extraData.textContent,
                     commentsCount: querySelectors.commentsCount && parseInt(querySelectors.commentsCount.textContent || "0",10),
                     repostsCount: querySelectors.repostsCount && parseInt(querySelectors.repostsCount.textContent || "0",10),
                     feedCount: {
@@ -101,26 +107,26 @@ class DataSelector{
                     },
                     quotedPost: {
                         Id: querySelectors.quotedPost.Id && parseInt(querySelectors.quotedPost.Id
-                            .attributes["ajaxify" as any].value
-                            .match(/profile_id=(\d+)/)[1]
+                            .attributes[config.QuotedPost.Id.attribute as any].value
+                            .match(new RegExp(config.QuotedPost.Id.pattern))[1]
                             || "0",10),
-                        value: ((_ : any) => {
-                            _ = _ && _.parentElement;
-                            _  = _ && _.querySelector("p");
-                            _  = _ && _.textContent;
-                            return _;
-                        })(querySelectors.quotedPost.value)
+                        value: ((_ : any) => (
+                            _ = _ && _.parentElement,
+                            _ = _ && _.querySelector(config.QuotedPost.Value.selector),
+                            _ && _.textContent
+                        ))(querySelectors.quotedPost.value)
                     },
                     lang: null,
                     linkImage: querySelectors.linkImage && querySelectors.linkImage.src,
-                    url: url,
+                     url: url,
                     place: place,
-                    date: ((_ : any) => {
-                        _ = _ && _.title;
-                        _  = _ && Date.parse(_.replace('pm', ":00 pm").replace('am', ":00 am"));
-                        _  = _ && new Date(_);
-                        return _;
-                    })(postHeader && postHeader.querySelector<HTMLLinkElement>("abbr")),
+                    date: ((_ : any) => (
+                        _ = _ && _.querySelector(config.Date.selector),
+                        _ = _ && _.title,
+                        _ = _ && Date.parse(_.replace('pm', ":00 pm").replace('am', ":00 am")),
+                        _ = _ && new Date(_),
+                        _
+                    ))(postHeader),
                 }
         });
     };

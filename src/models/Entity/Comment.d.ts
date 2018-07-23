@@ -1,3 +1,4 @@
+type Text = string;
 export type Comment = {
     externalProviderType:string,
     entityType:string,
@@ -6,7 +7,7 @@ export type Comment = {
     replyOwnerId:string,
     commentsCount:number,
     location:Text,
-    date:Date,
+    date:Date|string,
     likesCount:number,
     replyUserId:string,
     replyToPostId:string,

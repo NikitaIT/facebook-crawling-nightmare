@@ -253,20 +253,20 @@ const getGroupAbout = (): TGroupAbout => {
                     startsWith: "About This Group",
                     Description: {
                         clickSelector: `[title="See More"]`,
-                        pattern: /Description(.*)See More/
+                        pattern: /Description(.*)See More/.source
                     },
                     GroupType: {
-                        pattern: /Group Type(.*)/
+                        pattern: /Group Type(.*)/.source
                     }
                 },
                 Members: {
                     startsWith: "Members",
                     Count: {
-                        pattern: /Members · ([\d|,|.]+)/
+                        pattern: /Members · ([\d|,|.]+)/.source
                     },
                     AdminsAndModerators: {
                         selector: "span",
-                        selectorContainsPattern: /admin/i,
+                        selectorContainsPattern: /admin/i.source,
                         Users: {
                             selector: "a"
                         }
@@ -288,23 +288,23 @@ const getGroupAbout = (): TGroupAbout => {
             adminsAndModeratorsSection = (
                     ( _ => _ && Array.from( _.querySelectorAll(config.Members.AdminsAndModerators.selector)) || [])            
                     (members) 
-                ).find(_ => _.textContent.search(config.Members.AdminsAndModerators.selectorContainsPattern) != -1),
+                ).find(_ => _.textContent.search(new RegExp(config.Members.AdminsAndModerators.selectorContainsPattern)) != -1),
             adminsAndModerators = 
                 ( _ => _ && Array.from( _.querySelectorAll<HTMLLinkElement>(config.Members.AdminsAndModerators.Users.selector)) || [])
                 (adminsAndModeratorsSection);
     return {
         AboutThisGroup: {
             Description:  
-                (_ => (_ && _.textContent.match(config.AboutThisGroup.GroupType.pattern)[1]))
+                (_ => (_ && _.textContent.match(new RegExp(config.AboutThisGroup.GroupType.pattern))[1]))
                 (aboutThisGroup),
             GroupType:
-                (_ => (_ && _.textContent.match(config.AboutThisGroup.GroupType.pattern)[1]))
+                (_ => (_ && _.textContent.match(new RegExp(config.AboutThisGroup.GroupType.pattern))[1]))
                 (aboutThisGroup)
         },
         Members: {
             Count:
                 ((_ : any) => (
-                    _ = _ && _.textContent.match(config.Members.Count.pattern)[1],
+                    _ = _ && _.textContent.match(new RegExp(config.Members.Count.pattern))[1],
                     _ = _ && _.replace(/[,|.]/, ""),
                     _ && parseInt(_)
                 ))

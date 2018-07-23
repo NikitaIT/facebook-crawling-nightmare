@@ -1,10 +1,11 @@
 import { AboutTabs, gotoTabOn } from './AboutTabs';
 import { MainNav, TGotoPageForProfile } from '../../Nav';
 import { findEndSubstring } from '../../../utils/utils';
+import { configContactandBasicInfo } from './about.config';
 type Gender = "Mail"|"Female"|"Custom";
 export type InterestedIn = "Women"| "Men";
 
-export type Contact = {
+export type TContact = {
 	MobilePhones : string
 	Address:{
 		Address: string
@@ -19,7 +20,7 @@ export type Contact = {
 	}[]
 }
 
-export type BasicInfo = {
+export type TBasicInfo = {
 	BirthDate: Date
 	BirthYear: number
 	NameDay: Date
@@ -30,42 +31,39 @@ export type BasicInfo = {
 	PoliticalViews: {PoliticalViews: string, Description: Text}
 }
 
-export type ContactandBasicInfo = Contact & BasicInfo
+export type TContactandBasicInfo = TContact & TBasicInfo
 
-export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) => ()  : Promise<ContactandBasicInfo> => {
+export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) => ()  : Promise<TContactandBasicInfo> => {
+	const config = configContactandBasicInfo;
 	return gotoTabOn(gotoPageForProfile(MainNav.About))(AboutTabs.ContactandBasicInfo)
 		.wait('#pagelet_contact')
-		.evaluate(()=>{
-			const pagelets = {
-				contact: "#pagelet_contact",
-				basic: "#pagelet_basic"
-			}
-			const section = ".uiList.fbProfileEditExperiences";
-			const rows = document.querySelectorAll<HTMLSpanElement>(section + " li");
+		.evaluate((config)=>{
+			const rows = document.querySelectorAll<HTMLSpanElement>(config.sectionrows);
 			return Array
 			.from(rows)
 			.map((x: HTMLSpanElement)=> {
 				return x.innerText;
 			});
-		})
+		},config)
 		.then((rows: string[])=>{
-			const contactandBasicInfo: ContactandBasicInfo = {
-				BirthDate: new Date(findEndSubstring(rows, "Birthday")),
-				BirthYear: new Date(findEndSubstring(rows, "Birthday")).getFullYear(),
-				NameDay: new Date(findEndSubstring(rows, "Name Day")),
-				Gender: findEndSubstring(rows, "Gender") as Gender,
-				InterestedIn: findEndSubstring(rows, "Interested In") as InterestedIn,
-				Languages: findEndSubstring(rows, "Languages").split(","),
-				ReligiousViews: {ReligiousViews: findEndSubstring(rows, "Religious Views"), Description: "Text" as any as Text},
-				PoliticalViews: {PoliticalViews: findEndSubstring(rows, "Political Views"), Description: "Text" as any as Text},
-				MobilePhones : findEndSubstring(rows, "Mobile Phones"),
+			const 
+			contactandBasicInfo: TContactandBasicInfo = {
+				BirthDate: new Date(findEndSubstring(rows, config.BirthDate)),
+				BirthYear: new Date(findEndSubstring(rows, config.BirthYear)).getFullYear(),
+				NameDay: new Date(findEndSubstring(rows, config.NameDay)),
+				Gender: findEndSubstring(rows, config.Gender) as Gender,
+				InterestedIn: findEndSubstring(rows, config.InterestedIn) as InterestedIn,
+				Languages: findEndSubstring(rows, config.Languages.endWith).split(config.Languages.split),
+				ReligiousViews: {ReligiousViews: findEndSubstring(rows, config.ReligiousViews.ReligiousViews), Description: "Text" as any as Text},
+				PoliticalViews: {PoliticalViews: findEndSubstring(rows, config.PoliticalViews.PoliticalViews), Description: "Text" as any as Text},
+				MobilePhones : findEndSubstring(rows, config.MobilePhones),
 				Address: {
-					Address: findEndSubstring(rows, "Address"),
-					CityOrTown: findEndSubstring(rows, "City/Town"), //Saint Petersburg, Russia
-					Zip: findEndSubstring(rows, "Zip")
+					Address: findEndSubstring(rows, config.Address.Address),
+					CityOrTown: findEndSubstring(rows, config.Address.CityOrTown), //Saint Petersburg, Russia
+					Zip: findEndSubstring(rows, config.Address.Zip)
 				},
-				Neighborhood: findEndSubstring(rows, "Neighborhood"),
-				Email: findEndSubstring(rows, "Email"),
+				Neighborhood: findEndSubstring(rows, config.Neighborhood),
+				Email: findEndSubstring(rows, config.Email),
 				Phones: [{
 					type: "Home",
 					value: "string"

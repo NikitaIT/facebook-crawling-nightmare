@@ -1,6 +1,8 @@
 import { TGotoPageForProfile, MainNav, gotoPageFor } from "../../Nav";
 import * as Nightmare from "nightmare";
 import { gotoTabOn, EPhotosTabs } from "./PhotosTabs";
+import { scrollDown } from "../../../utils/utils";
+import { getUserIdByPage } from "../../../utils/Facebook";
 export type TPhotoPage = TPhotoPopup & {
     id?:number,
     albumId?:string,
@@ -24,7 +26,7 @@ type TPhotoPostPage = {
     place:Text,
     extraData:Text,
 }
-export type TAlbum = { //a[href*="/media/set"]
+export type TAlbumPage = { //a[href*="/media/set"]
     id?:number,
     type?:string, 
     thumbId?:number,
@@ -39,56 +41,47 @@ export type TAlbum = { //a[href*="/media/set"]
     postsCount:number
 }
 
-class DataSelector{
-    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => (tab: EPhotosTabs) :() => Promise<TAlbum[]|TPhotoPage[]> => {
+class DataSelector{//TAlbum[]|TPhotoPage[]
+    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => (tab: EPhotosTabs) : <T = TAlbumPage|TPhotoPage>() => Promise<T[]> => {
         console.debug("run TPhotoPage")
         const   selectorSection:string = `a[href*="/media/set"]`,
                 photosPage = gotoPageForProfile(MainNav.Photos).wait(1000),
-                id = 100025424408094,
-                scrollImagesOn = (nightmare: Nightmare) => 
-                    nightmare.evaluate((selectorSection)=> {
-                        return new Promise<boolean>((resolve,reject) =>{
-                            let count = 0;
-                            const timerId = setInterval( ()=> {
-                                let prevCount = count;
-                                count = document.querySelectorAll(selectorSection).length;
-                                if(count == prevCount){
-                                    clearInterval(timerId);
-                                    resolve(true);
-                                }
-                                window.scrollBy(0, 10000);
-                            },1000);
-                        });
-                    },selectorSection),
-                gotoTab = (tab: EPhotosTabs) => scrollImagesOn(gotoTabOn(photosPage)(tab)),
-                getData = <T = TAlbum|TPhotoPage>(tab: EPhotosTabs) => 
-                (): Promise<T[]>  => new Promise((resolve,reject) =>{
+                // scrollImagesOn = (nightmare: Nightmare) => 
+                //     nightmare.evaluate((selectorSection)=> {
+                //         return new Promise<boolean>((resolve,reject) =>{
+                //             let count = 0;
+                //             const timerId = setInterval( ()=> {
+                //                 let prevCount = count;
+                //                 count = document.querySelectorAll(selectorSection).length;
+                //                 if(count == prevCount){
+                //                     clearInterval(timerId);
+                //                     resolve(true);
+                //                 }
+                //                 window.scrollBy(0, 10000);
+                //             },1000);
+                //         });
+                //     },selectorSection),
+                gotoTab = (tab: EPhotosTabs) => scrollDown(gotoTabOn(photosPage)(tab),{selector: selectorSection}),
+                getData = (tab: EPhotosTabs) => 
+                <T = TAlbumPage|TPhotoPage>(): Promise<T[]>  => new Promise((resolve,reject) =>{
                     gotoTab(tab)
-                    .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
-                        if(x === true){
-                            console.debug("then TPhotoPage start evaluator", tab);
+                    .then(() => {
+                        getUserIdByPage(photosPage)
+                        .then(id => {
+                            console.debug("then TPhotoPage start evaluator", tab),
                             photosPage
-                            .evaluate(DataSelector.evaluator(tab),id)
-                            //.then(DataSelector.mapper)
-                            .then((c:T[])=> (console.log(c),resolve(c)))
-                            .catch(console.error)
-                        }
+                                .evaluate(DataSelector.evaluator(tab),id)
+                                //.then(DataSelector.mapper)
+                                .then((c:T[])=> (console.log(c),resolve(c)))
+                                .catch(console.error)
+                        });
                     })
                     .catch(console.error)
                 });
-        switch (tab) {
-            case EPhotosTabs.Albums:
-                return getData<TAlbum>(tab);
-            case EPhotosTabs.Photos:
-                return getData<TPhotoPage>(tab);
-            case EPhotosTabs.PhotosOf:
-                return getData<TPhotoPage>(tab);
-            default:
-                throw Error();
-        }
+        return getData(tab);
     };
     //Todo: сделать рефакторинг - стратегия.
-    private static evaluator(tab: EPhotosTabs): (id: number) => (TAlbum|TPhotoPage)[] | Promise<(TAlbum|TPhotoPage)[]>{
+    private static evaluator = (tab: EPhotosTabs): (id: number) => (TAlbumPage|TPhotoPage)[] | Promise<(TAlbumPage|TPhotoPage)[]> => {
         switch (tab) {
             case EPhotosTabs.Albums:
                 return DataSelector.albumEvaluator;
@@ -135,7 +128,7 @@ class DataSelector{
     //         });
     //     return Promise.all(photoItemsPromises);
     // };
-    private static photosEvaluator(id: number): TPhotoPage[]{
+    private static photosEvaluator = (id: number): TPhotoPage[] => {
         const   photoItems = Array.from(document.querySelectorAll<HTMLLIElement>(`[id*="pagelet_timeline_app_collection"]:not(.hidden_elem) li.fbPhotoStarGridElement`));
 
         return photoItems.map((x) : TPhotoPage => {
@@ -151,10 +144,10 @@ class DataSelector{
                 };
             });
     };
-    private static albumEvaluator(id: number) : TAlbum[]{
+    private static albumEvaluator = (id: number) : TAlbumPage[] => {
         const   albumHrefs = Array.from(document.querySelectorAll<HTMLLinkElement>(`[id*="pagelet_timeline_app_collection"]:not(.hidden_elem) a[href*="/media/set"]`));
         
-        return albumHrefs.map((x) : TAlbum=> {
+        return albumHrefs.map((x) : TAlbumPage=> {
                 const   textContent = Array.from(x.querySelectorAll<HTMLSpanElement>("span"))
                                     .filter( q => q.innerText !== "")
                                     .map(q => q.textContent),
@@ -176,7 +169,7 @@ class DataSelector{
             }
         });
     };
-    private static mapper(){
+    private static mapper = () => {
         return {
         }
     }

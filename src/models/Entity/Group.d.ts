@@ -1,3 +1,4 @@
+type Text = string;
 export type Group = {
     id:string,
     extraData:Text,
@@ -30,6 +31,6 @@ export type Group = {
     deleted:boolean,
     status:string,
     groupPrivacy:string,
-    registeredDate:Date,
+    registeredDate:Date|string,
     followersCount:number
 }

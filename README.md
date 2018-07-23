@@ -15,3 +15,10 @@ npm install
 # Run the app
 npm start
 ```
+
+```bash
+# Run the test
+npm run singletest src/**/test/test.ts
+#or all tests
+npm test
+```
