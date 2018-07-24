@@ -19,36 +19,60 @@ class EGroupSelectors {
 const config: EGroupSelectors = new EGroupSelectors();
 
 class DataSelector{
-    public static run = ( groupPage: Nightmare, id: string  ) => ()  : Promise<Group> => {
+    public static run =  ( groupPage: Nightmare ) => async ()  : Promise<Group> => {
         const   gotoTab = gotoGroupTabOn(groupPage),
-                getData = <T>(tab: EGroupTabs, evaluator: ()=> T) => (): Promise<T[]>  => 
-                new Promise((resolve,reject) =>{
-                    gotoTab(tab)
-                    .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
-                        if(x === true){
-                            console.debug("then TPhotoPage start evaluator", tab);
-                            groupPage
-                            .evaluate(evaluator,id)
-                            //.then(DataSelector.mapper)
-                            .then((c:T[])=> (console.log(c),resolve(c)))
-                            .catch(console.error)
+                getData = <T>(tab: EGroupTabs, evaluator: ()=> T) => async (): Promise<T>  => 
+                {
+                    try {
+                        if (await gotoTab(tab)) {
+                            console.debug("then Group start evaluator", tab);
+                            return await groupPage.evaluate(evaluator).then<T>(_ => _);
+                        } else{
+                            console.debug("дерьмо с табом ", tab);
                         }
-                    })
-                    .catch(console.error)
-                });
-
-
-        return new Promise((resolve,reject) =>{
-            chainPromiseFn([
-                getData(EGroupTabs.Discussion, getGroupDiscussion),
-                getData(EGroupTabs.Discussion, getGroupLayout),
-                getData(EGroupTabs.About, getGroupAbout),
-                getData(EGroupTabs.Members, getGroupMembers),
-            ])
-            .then(x => resolve(x as any as Group))
-        });
+                    } catch (error) {
+                        console.error(error)
+                    }
+                },
+                discussion = await getData(EGroupTabs.Discussion, getGroupDiscussion)(),
+                layout = await getData(EGroupTabs.Discussion, getGroupLayout)(),
+                about = await getData(EGroupTabs.About, getGroupAbout)(),
+                members = await getData(EGroupTabs.Members, getGroupMembers)();
+        
+        return {
+            //id:"string",
+            //extraData:"",
+            //name:"string",
+            screenName: layout && layout.Layout.Nav.Title,
+            //email:"string",
+            //country:"",
+            location: discussion && discussion.Location,
+            //city:"" ,
+            //address:"string",
+            type: about && about.AboutThisGroup.GroupType,
+            description: about && about.AboutThisGroup.Description,
+            //phone:"string",
+            private_: layout && layout.Layout.Nav.Privacy === "Private",
+            //premium:true,
+            //verified:true,
+            //homePage:"string",
+            //homePageName:"",
+            membersCount: members && members.Members.Count,
+            dateUpdated: about && about.Activity.CreatedAt,
+            //dateLabel:"string",
+            //photo:"string",//#headerArea img.photo
+            //photoSmall:"string",
+            //photoMedium:"string",
+            //photoLarge:"string",
+            admin: members && members.Members.AdminsAndModerators.Users[0],
+            //deleted:true,
+            //status:"string",
+            groupPrivacy: layout && layout.Layout.Nav.Privacy,
+            //registeredDate:new Date,
+            followersCount: members && members.Members.Count || about && about.Members.Count
+        };
     }
-    private static evaluator(){
+    private static evaluator = () => {
         const   links = Array.from(document.querySelectorAll<HTMLLinkElement>(config.membersCount.selector)),
                 membersCount = ((_ : any ) => {
                     _ = _ && _.textContent;
@@ -56,47 +80,7 @@ class DataSelector{
                     _ = _ && _[1];
                     _ = _ && parseInt(_);
                     return _;
-                })(links.find( x => x.textContent && x.textContent.match(config.membersCount.pattern) !== null)),
-                discussion = getGroupDiscussion(),
-                layout = getGroupLayout(),
-                about = getGroupAbout(),
-                members = getGroupMembers();
-
-        return  {
-            id:"string",
-            extraData:"" as any as Text,
-            name:"string",
-            screenName:"string",
-            email:"string",
-            country:""as any as Text,
-            location:""as any as Text,
-            city:""as any as Text,
-            address:"string",
-            type:"string",
-            description:"string",
-            phone:"string",
-            private_:true,
-            premium:true,
-            verified:true,
-            homePage:"string",
-            homePageName:"",
-            membersCount: membersCount,
-            ageFrom:1,
-            dateFrom:new Date,
-            dateTo:new Date,
-            dateUpdated:new Date,
-            dateLabel:"string",
-            photo:"string",//#headerArea img.photo
-            photoSmall:"string",
-            photoMedium:"string",
-            photoLarge:"string",
-            admin:"string",
-            deleted:true,
-            status:"string",
-            groupPrivacy:"string",
-            registeredDate:new Date,
-            followersCount:1
-        }
+                })(links.find( x => x.textContent && x.textContent.match(config.membersCount.pattern) !== null));
     };
     private static mapper(friendsContent: any){
         return {
@@ -135,11 +119,12 @@ const getGroupDiscussion = (): TGroupDiscussion => {
 /**
  * Публичная страница
  */
+type TPrivacy = "Public"|"Private"
 type TGroupLayout = {
     Layout: {
         Nav:{
             Title: string,
-            Privacy: string
+            Privacy: TPrivacy
         }
     },
 }
@@ -167,7 +152,7 @@ const getGroupLayout = (): TGroupLayout => {
                     (document.querySelector<HTMLElement>(config.Layout.Nav.Title.selector)),
                 Privacy: 
                     (_ => _ && _.textContent.match(config.Layout.Nav.Privacy.pattern)[1])
-                    (document.querySelector<HTMLElement>(config.Layout.Nav.Privacy.selector))
+                    (document.querySelector<HTMLElement>(config.Layout.Nav.Privacy.selector)) as any as TPrivacy
             }
         },
     }
@@ -210,7 +195,8 @@ const getGroupMembers = (): TGroupMembers => {
         Members: {
             Count: 
                 ((_ : any) => (
-                    _ = _ && _.textContent.match(config.Members.Count.pattern)[1],
+                    _ = _ && _.textContent.match(config.Members.Count.pattern),
+                    _ = _ && _[1],
                     _ = _ && _.replace(/[,|.]/, ""),
                     _ && parseInt(_)
                 ))
@@ -219,7 +205,8 @@ const getGroupMembers = (): TGroupMembers => {
                 Users: adminsAndModerators.map(_ => _.href),
                 Count:
                     ((_ : any) => (
-                        _ = _ && _.textContent.match(config.Members.Count.pattern)[2],
+                        _ = _ && _.textContent.match(config.Members.Count.pattern),
+                        _ = _ && _[2],
                         _ = _ && _.replace(/[,|.]/, ""),
                         _ && parseInt(_)
                     ))
@@ -253,7 +240,7 @@ const getGroupAbout = (): TGroupAbout => {
                     startsWith: "About This Group",
                     Description: {
                         clickSelector: `[title="See More"]`,
-                        pattern: /Description(.*)See More/.source
+                        pattern: /Description(.*)(See More|Group Type)/.source
                     },
                     GroupType: {
                         pattern: /Group Type(.*)/.source

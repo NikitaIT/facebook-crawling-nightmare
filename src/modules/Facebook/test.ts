@@ -13,6 +13,22 @@ describe('Facebook', function() {
   this.timeout(135000);
   const facebook = new Facebook(nightmare, testConfig.shortName),
         app = facebook.authPage(nightmare, auth.email, auth.password);
+        
+  describe('getGroup function', function() {
+    it('should return GSTResearchGroup', (done) => {
+      app.then((e: any)=>{
+        return facebook.getGroup(nightmare,"GSTResearchGroup");
+      })
+      .then(x=>{
+          console.log(x);
+            expect(x).be.equal(AlbumsTestData.map(Automapper.mapToAlbum.FromTAlbumPage));
+            done();
+          })
+      .catch((error) => {
+          done(error);
+      });
+    });
+  });
   describe('getAlbum function', function() {
     it('should return AlbumsTestData', (done) => {
       app.then((e: any)=>{

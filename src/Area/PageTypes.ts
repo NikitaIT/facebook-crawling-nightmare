@@ -1,5 +1,5 @@
 
-export enum PageTypes {
+export enum PageType {
     //SUPERCATEGORY на сайте
     BusinessOrBrand =  "BUSINESS", //Showcase your products and services, spotlight your brand and reach more customers on Facebook.
     //https://www.facebook.com/amygshair/
@@ -9,7 +9,7 @@ export enum PageTypes {
     Group = "Group",//https://www.facebook.com/groups/GSTResearchGroup/
     Person = "Person",
 }
-export enum PagesCategory {
+export enum PageCategory {
     LocalBusinessOrPlace = 1006,
     CompanyOrganizationOrInstitution = 1013,
     BrandOrProduct = 1009,

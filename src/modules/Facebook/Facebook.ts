@@ -21,6 +21,8 @@ import { TPostPage, PostPages } from '../../Area/Person/Posts/Posts';
 import { Login } from '../../Area/Login/Login';
 import { Automapper } from '../../infrastructure/Automapper';
 import { goToPage } from '../../utils/Facebook';
+import { Groups } from '../../Area/Group/Group';
+import { PageType } from '../../Area/PageTypes';
 
 
 enum Search{
@@ -34,7 +36,7 @@ interface IFacebook{
 	getAlbum(nightmare : Nightmare) : Promise<Album[]>
 	getComment(nightmare : Nightmare) : Promise<Comment[]>
 	getContact(nightmare : Nightmare) : Promise<Contact>
-	getGroup(nightmare : Nightmare) : Promise<Group[]>
+	getGroup(nightmare : Nightmare,id: string) : Promise<Group>
 	getPhoto(nightmare : Nightmare) : Promise<Photo[]>
 	getPhotoTag(nightmare : Nightmare) : Promise<PhotoTag>
 	getPost(nightmare : Nightmare) : Promise<Post[]>
@@ -72,8 +74,8 @@ export default class Facebook implements IFacebook {
 	getContact(nightmare: Nightmare): Promise<Contact> {
 		throw new Error("Method not implemented.");
 	}
-	getGroup(nightmare: Nightmare): Promise<Group[]> {
-		throw new Error("Method not implemented.");
+	getGroup(nightmare: Nightmare,id: string): Promise<Group> {
+		return Groups(goToPage(nightmare, id, PageType.Group))();
 	}
 	getPhoto(nightmare: Nightmare): Promise<Photo[]> {
 		return PhotosPages(this.gotoPageForProfile())

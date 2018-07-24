@@ -1,18 +1,25 @@
 import * as Nightmare from 'nightmare';
 import { MetaHTMLAttributes } from 'react';
+import { PageType } from '../Area/PageTypes';
 
 export const goToPage = (
     nightmare : Nightmare, 
-    id: string | number, 
+    id: string | number,
+    pageType: PageType = PageType.Person,
     conf?: {
         rootUrl: string,
-        profileRoute: string
+        PersonRoute: string,
+        GroupRoute: string,
     }
 ) => {
     let config = {
-        rootUrl: 'https://www.facebook.com/',
-        profileRoute: 'profile.php',
+        rootUrl: 'https://www.facebook.com',
+        PersonRoute: '/profile.php',
+        GroupRoute: '/groups',
         ...conf
+    }
+    if(pageType === PageType.Group){
+        return nightmare.goto(`${config.rootUrl}${config.GroupRoute}/${id}`);
     }
     let queryUrl = config.rootUrl;
     switch (typeof(id)) {
@@ -20,12 +27,11 @@ export const goToPage = (
             queryUrl += id;
             break;
         case 'number':
-            queryUrl += config.profileRoute + '?id=' + id;
+            queryUrl += `${config.PersonRoute}?id=${id}`;
             break;
         default:
             throw new TypeError(`Тип аргумента: ${typeof(id)}. Требуется string или number.`)
     }
-    console.log("queryUrl:",queryUrl);
     return nightmare.goto(queryUrl);
 }
 
