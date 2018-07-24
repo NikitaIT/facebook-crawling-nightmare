@@ -59,7 +59,7 @@ export function scrollDown(
 			previousHeight = currentHeight;
 
 		return nm.evaluate(function (selector) {
-				return { currentHeight: document.body.scrollHeight, count: document.querySelectorAll(selector).length};
+				return { currentHeight: document.body.scrollHeight, currentCount: document.querySelectorAll(selector).length};
 			},selector)
 			.then(({currentHeight,currentCount}) => {
 				
@@ -75,6 +75,16 @@ export function scrollDown(
 						selectorIterationsCount = maxSelectorIterationsCount;
 				}
 				previousSelectorIterationsCount = selectorIterationsCount;
+				console.log({
+					previousHeight,
+					currentHeight,
+					maxIterationsCount,
+					selector,
+					count,
+					maxSelectorIterationsCount,
+					previousSelectorIterationsCount,
+					selectorIterationsCount
+				})
 
 				resolve(scrollDown(
 					nm.scrollTo(currentHeight, 0).wait(3000),

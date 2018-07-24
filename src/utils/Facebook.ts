@@ -24,7 +24,7 @@ export const goToPage = (
     let queryUrl = config.rootUrl;
     switch (typeof(id)) {
         case 'string':
-            queryUrl += id;
+            queryUrl += `/${id}`;
             break;
         case 'number':
             queryUrl += `${config.PersonRoute}?id=${id}`;
@@ -32,6 +32,7 @@ export const goToPage = (
         default:
             throw new TypeError(`Тип аргумента: ${typeof(id)}. Требуется string или number.`)
     }
+    console.log("queryUrl", queryUrl)
     return nightmare.goto(queryUrl);
 }
 

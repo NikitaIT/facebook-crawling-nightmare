@@ -43,10 +43,10 @@ export type TAlbumPage = { //a[href*="/media/set"]
 
 class DataSelector{//TAlbum[]|TPhotoPage[]
     public static run = ( gotoPageForProfile: TGotoPageForProfile ) => (tab: EPhotosTabs) : <T = TAlbumPage|TPhotoPage>() => Promise<T[]> => {
-        console.debug("run TPhotoPage")
+        console.debug("run TPhotoPage|TAlbum")
         const   selectorSection:string = `a[href*="/media/set"]`,
                 photosPage = gotoPageForProfile(MainNav.Photos).wait(1000),
-                gotoTab = (tab: EPhotosTabs) => scrollDown(gotoTabOn(photosPage)(tab),{selector: selectorSection}),
+                gotoTab = (tab: EPhotosTabs) => scrollDown(gotoTabOn(photosPage)(tab).wait(2000),{selector: selectorSection}),
                 getData = (tab: EPhotosTabs) => 
                 <T = TAlbumPage|TPhotoPage>(): Promise<T[]>  => new Promise((resolve,reject) =>{
                     gotoTab(tab)
