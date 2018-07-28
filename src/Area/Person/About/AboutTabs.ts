@@ -1,5 +1,6 @@
 
 import * as Nightmare  from "nightmare";
+import { clickSafe } from "../../../utils/Nightmare";
 
 export enum AboutTabs{
 	Overview = "Overview",
@@ -11,6 +12,4 @@ export enum AboutTabs{
 	LifeEvents = "Life Events",
 }
 
-export const gotoTabOn = (page: Nightmare) => ( selector:AboutTabs ) => page
-				.wait(`li[title*="${selector}"]`)
-				.click(`li[title*="${selector}"] a`);
+export const gotoTabOn = (page: Nightmare) => ( selector:AboutTabs ) => clickSafe(page)(`li[title*="${selector}"] a`);

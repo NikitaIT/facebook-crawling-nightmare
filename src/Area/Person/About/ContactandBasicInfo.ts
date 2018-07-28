@@ -33,10 +33,12 @@ export type TBasicInfo = {
 
 export type TContactandBasicInfo = TContact & TBasicInfo
 
-export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) => ()  : Promise<TContactandBasicInfo> => {
-	const config = configContactandBasicInfo;
-	return gotoTabOn(gotoPageForProfile(MainNav.About))(AboutTabs.ContactandBasicInfo)
-		.wait('#pagelet_contact')
+export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) => async ()  : Promise<TContactandBasicInfo> => {
+	const 	config = configContactandBasicInfo,
+			responseAbout = await gotoPageForProfile(MainNav.About),
+			responseContactandBasicInfo = await gotoTabOn(responseAbout.nightmare)(AboutTabs.ContactandBasicInfo);
+	return responseContactandBasicInfo.nightmare
+		.wait('#pagelet_contact',2000)
 		.evaluate((config)=>{
 			const rows = document.querySelectorAll<HTMLSpanElement>(config.sectionrows);
 			return Array

@@ -6,6 +6,7 @@ import { Album } from "../models/Entity/Album";
 import { TLifeEvents } from "../Area/Person/About/LifeEvents";
 import { Person } from "../models/Entity/Person";
 import { TContactandBasicInfo } from "../Area/Person/About/ContactandBasicInfo";
+import { TFriend } from "../Area/Person/Friends/Friends";
 
 export class Automapper{
     /**
@@ -70,6 +71,14 @@ export class Automapper{
                 email: x.Email,
                 phone: `${x.MobilePhones}, ${x.Phones.map(x=> `${x.type}:${x.value}`).concat(",")}`,
                 gender: x.Gender,
+            }
+        ),
+        FromTFriend: (x: TFriend): Person => (
+            {
+                id: x.id && x.id.toString(),
+                name: x.name,
+                photoSmall: x.accauntImage["100x100"],
+                url: x.accauntLink
             }
         ),
     };

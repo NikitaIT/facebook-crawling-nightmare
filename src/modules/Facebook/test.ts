@@ -13,7 +13,22 @@ describe('Facebook', function() {
   this.timeout(135000);
   const facebook = new Facebook(nightmare, testConfig.shortName),
         app = facebook.authPage(nightmare, auth.email, auth.password);
-        
+ 
+  describe('getFriends function', function() {
+    it('should return FriendsTestData', (done) => {
+      app.then((e: any)=>{
+        return facebook.getFriends(nightmare);
+      })
+      .then(x=>{
+          console.log(x);
+            expect(x).be.equal([].map(Automapper.mapToPerson.FromTFriend));
+            done();
+          })
+      .catch((error) => {
+          done(error);
+      });
+    });
+  });      
 
   describe('getAlbum function', function() {
     it('should return AlbumsTestData', (done) => {

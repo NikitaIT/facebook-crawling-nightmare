@@ -2,7 +2,7 @@ import { TGotoPageForProfile, MainNav } from "../../Nav";
 import { config, PostsConfig } from "./posts.config";
 import { getUserIdByPage } from "../../../utils/Facebook";
 import * as Nightmare from "nightmare";
-import { scrollDown } from "../../../utils/utils";
+import { scrollDown } from "../../../utils/Nightmare";
 
 export type TPostPage = {
     extraData?: string,//.userContent
@@ -35,16 +35,15 @@ export type TPostPage = {
 }
 
 class DataSelector{
-    public static run = ( gotoPageForProfile: TGotoPageForProfile ) => ()  : Promise<TPostPage[]> => {
-        const   gotoTimeline = gotoPageForProfile(MainNav.Timeline).wait(1000);
+    public static run = ( gotoPageForProfile: TGotoPageForProfile ) =>  ()  : Promise<TPostPage[]> => 
+        new Promise( async ( resolve, reject ) =>{
+            const	gotoTimeline = (await gotoPageForProfile(MainNav.Timeline)).nightmare;
 
-        return  new Promise((resolve,reject) =>{
             scrollDown(gotoTimeline).then(n => 
             getUserIdByPage(gotoTimeline)
                 .then(id => {
-                    console.log("id: ", id)
                     gotoTimeline
-                    .wait(2000)
+                        .wait(2000)
                         .evaluate(DataSelector.postEvaluator, id, config)
                         //.then(DataSelector.mapper)
                         .then((c: TPostPage[]) => (console.log("cc",c), resolve(c)))
@@ -53,8 +52,7 @@ class DataSelector{
                 .catch(console.error)
             )
         });
-    };
-    static postEvaluator = (id: number,config: PostsConfig) : TPostPage[] => {
+    private static postEvaluator = (id: number,config: PostsConfig) : TPostPage[] => {
         const   wrapper = Array.from(document.querySelectorAll<HTMLImageElement>(config.Wrapper.selector));
         
         return wrapper.map((x) : TPostPage=> {

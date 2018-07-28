@@ -1,7 +1,7 @@
 import { TGotoPageForProfile, MainNav, gotoPageFor } from "../../Nav";
 import * as Nightmare from "nightmare";
 import { gotoTabOn, EPhotosTabs } from "./PhotosTabs";
-import { scrollDown } from "../../../utils/utils";
+import { scrollDown } from "../../../utils/Nightmare";
 import { getUserIdByPage } from "../../../utils/Facebook";
 export type TPhotoPage = TPhotoPopup & {
     id?:number,
@@ -44,26 +44,35 @@ export type TAlbumPage = { //a[href*="/media/set"]
 class DataSelector{//TAlbum[]|TPhotoPage[]
     public static run = ( gotoPageForProfile: TGotoPageForProfile ) => (tab: EPhotosTabs) : <T = TAlbumPage|TPhotoPage>() => Promise<T[]> => {
         console.debug("run TPhotoPage|TAlbum")
-        const   selectorSection:string = `a[href*="/media/set"]`,
-                photosPage = gotoPageForProfile(MainNav.Photos).wait(1000),
-                gotoTab = (tab: EPhotosTabs) => scrollDown(gotoTabOn(photosPage)(tab).wait(2000),{selector: selectorSection}),
-                getData = (tab: EPhotosTabs) => 
-                <T = TAlbumPage|TPhotoPage>(): Promise<T[]>  => new Promise((resolve,reject) =>{
-                    gotoTab(tab)
-                    .then(() => {
-                        getUserIdByPage(photosPage)
-                        .then(id => {
-                            console.debug("then TPhotoPage start evaluator", tab),
-                            photosPage
-                                .evaluate(DataSelector.evaluator(tab),id)
-                                //.then(DataSelector.mapper)
-                                .then((c:T[])=> (console.log(c),resolve(c)))
-                                .catch(console.error)
-                        });
-                    })
-                    .catch(console.error)
+
+        return <T = TAlbumPage|TPhotoPage>(): Promise<T[]>  => new Promise(async (resolve,reject) =>{
+            const   selectorSection:string = `a[href*="/media/set"]`;
+            const	responsePhotos = await gotoPageForProfile(MainNav.Photos);
+            if( !responsePhotos.isOk ){
+                reject(`Таб ${MainNav.Photos} не найден!`)
+            } 
+            const	responsePhotosTab = await gotoTabOn(responsePhotos.nightmare)(tab);
+            if( !responsePhotos.isOk ){
+                reject(`Таб ${MainNav.Photos} => ${tab} не найден!`)
+            }
+            
+            const   photosPage = responsePhotosTab.nightmare,
+                    gotoTab = (tab: EPhotosTabs) => scrollDown(photosPage,{selector: selectorSection});
+             
+            gotoTab(tab)
+            .then(() => {
+                getUserIdByPage(photosPage)
+                .then(id => {
+                    console.debug("then TPhotoPage start evaluator", tab),
+                    photosPage
+                        .evaluate(DataSelector.evaluator(tab),id)
+                        //.then(DataSelector.mapper)
+                        .then((c:T[])=> (console.log(c),resolve(c)))
+                        .catch(console.error)
                 });
-        return getData(tab);
+            })
+            .catch(console.error)
+        });
     };
     //Todo: сделать рефакторинг - стратегия.
     private static evaluator = (tab: EPhotosTabs): (id: number) => (TAlbumPage|TPhotoPage)[] | Promise<(TAlbumPage|TPhotoPage)[]> => {

@@ -19,9 +19,17 @@ export enum LifeEventsTypes {
 	WorkedAt = "Worked at ",
 	MovedTo = "Moved to "
 }
-export const LifeEvents = (gotoPageForProfile: TGotoPageForProfile) => (): Promise<TLifeEvents> => {
-	return gotoTabOn(gotoPageForProfile(MainNav.About))(AboutTabs.LifeEvents)
-		.wait('.fbProfileEditExperiences')
+export const LifeEvents = (gotoPageForProfile: TGotoPageForProfile) => async (): Promise<TLifeEvents> => {
+	const	responseAbout = await gotoPageForProfile(MainNav.About);
+	if(!responseAbout.isOk){
+		return Promise.reject(`Таб ${MainNav.About} не найден!`)
+	}
+	const response = await gotoTabOn(responseAbout.nightmare)(AboutTabs.LifeEvents);
+	if(!response.isOk){
+		return Promise.reject(`Таб ${MainNav.About} => ${AboutTabs.LifeEvents} не найден!`)
+	}
+	return response.nightmare
+		.wait('.fbProfileEditExperiences',2000)
 		.evaluate(() => {
 			const lifeEvents = document.querySelectorAll<HTMLSpanElement>('.fbProfileEditExperiences a span');
 			return Array

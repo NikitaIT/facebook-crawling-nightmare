@@ -1,4 +1,5 @@
 import * as Nightmare  from "nightmare";
+import { TNightmareResponse, clickSafe } from "../utils/Nightmare";
 
 export enum MainNav{
 	Timeline = "timeline",
@@ -26,6 +27,10 @@ export enum SubNav{
 	Reviews= "reviews",
 	Notes= "notes"
 }
+
 const NavSelector = "a[data-tab-key*='{0}']";
-export const gotoPageFor = (profile: Nightmare) => (page: MainNav) => profile.click(`a[data-tab-key*="${page}"]`);
-export type TGotoPageForProfile = (menuItem: MainNav) => Nightmare;
+export const gotoPageFor = (profile: Nightmare): TGotoPageForProfile => async (pageTab: MainNav): TNightmareResponse => {
+	return clickSafe(profile)(NavSelector.replace('{0}',pageTab));
+};
+
+export type TGotoPageForProfile = (menuItem: MainNav) => TNightmareResponse;

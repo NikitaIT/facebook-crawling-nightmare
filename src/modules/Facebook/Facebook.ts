@@ -23,6 +23,7 @@ import { Automapper } from '../../infrastructure/Automapper';
 import { goToPage } from '../../utils/Facebook';
 import { Groups } from '../../Area/Group/Group';
 import { PageType } from '../../Area/PageTypes';
+import { Friends } from '../../Area/Person/Friends/Friends';
 
 
 enum Search{
@@ -33,6 +34,7 @@ enum Search{
 interface IFacebook{
 	authPage(nightmare : Nightmare, email: string, password: string): Promise<{}>,
 	getPerson(nightmare : Nightmare) : Promise<Person>
+	getFriends(nightmare : Nightmare) : Promise<Person[]>
 	getAlbum(nightmare : Nightmare) : Promise<Album[]>
 	getComment(nightmare : Nightmare) : Promise<Comment[]>
 	getContact(nightmare : Nightmare) : Promise<Contact>
@@ -45,10 +47,9 @@ interface IFacebook{
 export default class Facebook implements IFacebook {
 	profile: () => Nightmare;
 	private gotoProfilePage =  (nightmare: Nightmare) => ( id: string|number ) => goToPage(nightmare, id).wait('#fbTimelineHeadline');
-	private gotoPageForProfile: () => (page: MainNav) => Nightmare;
+	private gotoPageForProfile = () => gotoPageFor(this.profile());
 	public constructor(nightmare: Nightmare, id: string|number){
 		this.profile = () => this.gotoProfilePage(nightmare)(id);
-		this.gotoPageForProfile =  () => gotoPageFor(this.profile());
 	}
 	getPerson(nightmare: Nightmare): Promise<Person> {
 		return chainPromiseFn(
@@ -67,6 +68,10 @@ export default class Facebook implements IFacebook {
 		(EPhotosTabs.Albums)
 		<TAlbumPage>()
 		.then( y => y.map<Album>( Automapper.mapToAlbum.FromTAlbumPage ));
+	}
+	getFriends(nightmare: Nightmare): Promise<Person[]> {
+		return Friends(this.gotoPageForProfile())()
+			.then(y => y.friends.map(Automapper.mapToPerson.FromTFriend));
 	}
 	getComment(nightmare: Nightmare): Promise<Comment[]> {
 		throw new Error("Method not implemented.");

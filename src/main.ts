@@ -19,6 +19,7 @@ export default class Main {
                 () => facebookAuth.getPost(nightmare),
                 () => facebookAuth.getAlbum(nightmare),
                 () => facebookAuth.getPhoto(nightmare),
+                () => facebookAuth.getFriends(nightmare),
                 () => Promise.resolve(nightmare.end())
             ])
             .then(console.log);

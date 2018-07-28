@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { MainNav, TGotoPageForProfile } from '../../Nav';
 import { findEndSubstring } from '../../../utils/utils';
+import { scrollDown } from '../../../utils/Nightmare';
 //#pagelet_timeline_medley_friends //[name="All Friends"] 
 export enum EFriendsTabs{
     AllFriends = "All Friends",
@@ -44,39 +45,24 @@ type TFriendsContent = { cardData: TCardData[], friendsTabsText: TFriendsTabsTex
 
 class DataSelector{
     public static run = ( gotoPageForProfile: TGotoPageForProfile ) => ()  : Promise<TFriendsPage> => {
-        const   selector:string  = `[data-testid="friend_list_item"]`,
-                selectorCounts:string = `[name="{0}"]`,
-                selectorSection:string = `[aria-role="region"]`,
-                nm = gotoPageForProfile(MainNav.Friends)
-                .wait(`#pagelet_timeline_medley_friends`) //<Friend[]>
-                .wait(1000);
-        
-        
-        return  new Promise((resolve,reject) =>{
-            nm.evaluate((selectorSection)=> {
-                return new Promise<boolean>((resolve,reject) =>{
-                    const timerId = setInterval( ()=> {
-                        if(document.querySelectorAll(selectorSection).length > 1){
-                            clearInterval(timerId);
-                            resolve(true);
-                        }
-                        window.scrollBy(0, document.body.scrollHeight);
-                    },1000);
-                });
-            },selectorSection)
-            .then((x: Promise<boolean>| boolean) => { //магия, где распаковался промис:?)
-                if(x === true){
-                    nm
+        return  new Promise( async ( resolve, reject ) =>{
+            const   selector:string  = `[data-testid="friend_list_item"]`,
+                    selectorCounts:string = `[name="{0}"]`,
+                    selectorSection:string = `[aria-role="region"]`,
+                    nm = (await gotoPageForProfile(MainNav.Friends)).nightmare
+                        .wait(`#pagelet_timeline_medley_friends`,2000);
+            scrollDown(nm,{selector:selectorSection})
+            .then((page) => {
+                nm
                     .evaluate<string,string,string[],TFriendsContent>(DataSelector.evaluator, selector, selectorCounts, Object.values(EFriendsTabs))
                     .then(DataSelector.mapper)
                     .then((c)=> resolve(c))
                     .catch(console.error)
-                }
             }
             )
         });
     };
-    private static evaluator( selector: string, selectorCounts: string, friendsTabs: string[]){
+    private static evaluator = ( selector: string, selectorCounts: string, friendsTabs: string[]) => {
         const   images = Array.from(document.querySelectorAll<HTMLImageElement>(selector.concat(' img'))),
                 links = Array.from(document.querySelectorAll<HTMLLinkElement>(selector.concat(' a'))),
                 friendsTabsText: TFriendsTabsText  = {},
