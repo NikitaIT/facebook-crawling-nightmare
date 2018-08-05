@@ -40,3 +40,8 @@ export const chainPromiseFn = (actions: (() => Promise<any>)[]): Promise<any> =>
 export function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+/**
+ * Хошошая альтернатива eval, но в evaluate придется её передавать явно
+ * @param str /[1]/[2].toString()
+ */
+export const new_RegExp_fromString = (str: string) => (_ => new RegExp(_[1], _[2] || ''))(str.match(/\/(.*?)\/([gimy])?$/));

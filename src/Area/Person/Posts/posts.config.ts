@@ -32,7 +32,7 @@ export const config: PostsConfig = {
         selector: `.userContentWrapper [ajaxify*="/follow/"]`,
         Id:  {
             attribute: "ajaxify",
-            pattern: /profile_id=(\d+)/.source
+            pattern: /profile_id=(\d+)/.toString()
         },
         Value: {
             selector: `p`

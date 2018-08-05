@@ -34,6 +34,7 @@ export type TBasicInfo = {
 export type TContactandBasicInfo = TContact & TBasicInfo
 
 export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) => async ()  : Promise<TContactandBasicInfo> => {
+	console.log("ContactandBasicInfo");
 	const 	config = configContactandBasicInfo,
 			responseAbout = await gotoPageForProfile(MainNav.About),
 			responseContactandBasicInfo = await gotoTabOn(responseAbout.nightmare)(AboutTabs.ContactandBasicInfo);
@@ -58,7 +59,7 @@ export const ContactandBasicInfo = ( gotoPageForProfile: TGotoPageForProfile) =>
 				Languages: findEndSubstring(rows, config.Languages.endWith).split(config.Languages.split),
 				ReligiousViews: {ReligiousViews: findEndSubstring(rows, config.ReligiousViews.ReligiousViews), Description: "Text" as any as Text},
 				PoliticalViews: {PoliticalViews: findEndSubstring(rows, config.PoliticalViews.PoliticalViews), Description: "Text" as any as Text},
-				MobilePhones : findEndSubstring(rows, config.MobilePhones),
+				MobilePhones: findEndSubstring(rows, config.MobilePhones),
 				Address: {
 					Address: findEndSubstring(rows, config.Address.Address),
 					CityOrTown: findEndSubstring(rows, config.Address.CityOrTown), //Saint Petersburg, Russia

@@ -36,5 +36,5 @@ const gotoLinkTabOn = async (page: Nightmare, selector:string ) => {
         && page.click(tab).wait(2000).exists(tab).then<boolean>(_ => _);
 };
 
-export const gotoGroupTabOn = (page: Nightmare) => ( selector:EGroupTabs ) => gotoLinkTabOn(page, selector);
+export const gotoGroupTabOn = (page: Nightmare) => ( selector:EGroupTabs ) => gotoLinkTabOn(page, selector == EGroupTabs.Discussion?"":selector);
 export const gotoPageTabOn = (page: Nightmare) => ( selector:EPageTabs ) => gotoLinkTabOn(page, getPageTabSelector(selector));

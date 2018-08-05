@@ -20,6 +20,8 @@ export const goToPage = (
     }
     if(pageType === PageType.Group){
         return nightmare.goto(`${config.rootUrl}${config.GroupRoute}/${id}`);
+    } else if(pageType === PageType.CommunityOrPublicFigure){
+        return nightmare.goto(`${config.rootUrl}/${id}`);
     }
     let queryUrl = config.rootUrl;
     switch (typeof(id)) {
@@ -46,7 +48,7 @@ export const getUserIdByPage = (
             },
             meta: {
                 selector: string,
-                pattern: RegExp
+                pattern: string
             }
         }
     }
@@ -59,7 +61,7 @@ export const getUserIdByPage = (
             },
             meta: {
                 selector: 'meta[property*="url"][content*="profile"]',
-                pattern: /(\d+)/.source
+                pattern: /(\d+)/.toString()
             }
         },
         ...conf
@@ -76,7 +78,7 @@ export const getUserIdByPage = (
                     ))
                     (document.querySelector(selector)) 
                 ||  
-                    (_ => _ && _.content.match(new RegExp(config.Id.meta.pattern))[0])
+                    (_ => _ && _.content.match(eval(config.Id.meta.pattern))[0])
                     (document.querySelector<HTMLMetaElement>(config.Id.meta.selector))
                 );
         },config)

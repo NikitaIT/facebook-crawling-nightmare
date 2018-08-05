@@ -76,11 +76,35 @@ describe('Facebook', function() {
   describe('getGroup function', function() {
     it('should return GSTResearchGroup', (done) => {
       app.then((e: any)=>{
-        return facebook.getGroup(nightmare,"GSTResearchGroup");
+        return facebook.getGroup(nightmare,"lciGST");
       })
       .then(x=>{
           console.log(x);
-            expect(x).be.equal(AlbumsTestData.map(Automapper.mapToAlbum.FromTAlbumPage));
+            expect(x).be.equal({ screenName: 'LCI Service (GST)',
+            location: 'Oak Brook, Illinois',
+            type: 'Team',
+            description: 'The Global Service Team (GST) champions the service framework of LCI and LCIF and empower Lions and Leos around the world to maximize impactful service, action and growth. ',
+            private_: false,
+            membersCount: 1476,
+            dateUpdated: '2017-08-03T19:52:00.000Z',
+            admin: '100012366762940',
+            groupPrivacy: 'Public',
+            followersCount: 1476 });
+            done();
+          })
+      .catch((error) => {
+          done(error);
+      });
+    });
+  });
+  describe('getGroupMembers function', function() {
+    it('should return lciGST', (done) => {
+      app.then((e: any)=>{
+        return facebook.getGroupMembers(nightmare,"lciGST");
+      })
+      .then(x=>{
+          console.log(x);
+            expect(x).be.equal([]);
             done();
           })
       .catch((error) => {

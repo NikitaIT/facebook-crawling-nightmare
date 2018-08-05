@@ -78,7 +78,7 @@ class DataSelector{
                             cardImage: TCardData = {
                                 id: undefined,
                                 name: name,
-                                accauntLink: (a.href.split("?"))[0],
+                                accauntLink: a.href,
                                 accauntImage: {
                                     '100x100': img.src
                                 },

@@ -22,7 +22,7 @@ export class Automapper{
                 extraData: x.extraData,
                 commentsCount: x.commentsCount,
                 date: x.date,
-                likesCount: x.feedCount.likes,
+                likesCount: x.feedCount.likes + x.feedCount.love + x.feedCount.wow,
                 place: x.place,
                 quotedPostId: x.quotedPost.Id && x.quotedPost.Id.toString(),
                 quotedPost: x.quotedPost.value,

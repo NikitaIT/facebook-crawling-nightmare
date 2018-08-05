@@ -96,18 +96,18 @@ class DataSelector{
                         }; 
                 return {
                     extraData: querySelectors.extraData && querySelectors.extraData.textContent,
-                    commentsCount: querySelectors.commentsCount && parseInt(querySelectors.commentsCount.textContent || "0",10),
-                    repostsCount: querySelectors.repostsCount && parseInt(querySelectors.repostsCount.textContent || "0",10),
+                    commentsCount: querySelectors.commentsCount && parseInt(querySelectors.commentsCount.textContent || "0",10) || 0,
+                    repostsCount: querySelectors.repostsCount && parseInt(querySelectors.repostsCount.textContent || "0",10) || 0,
                     feedCount: {
-                        likes: querySelectors.feedCount.likes && parseInt(querySelectors.feedCount.likes.textContent || "0",10),
-                        love: querySelectors.feedCount.love && parseInt(querySelectors.feedCount.love && querySelectors.feedCount.love.textContent || "0",10),
-                        wow: querySelectors.feedCount.wow && parseInt(querySelectors.feedCount.wow.textContent || "0",10),
+                        likes: querySelectors.feedCount.likes && parseInt(querySelectors.feedCount.likes.textContent || "0",10) || 0,
+                        love: querySelectors.feedCount.love && parseInt(querySelectors.feedCount.love && querySelectors.feedCount.love.textContent || "0",10) || 0,
+                        wow: querySelectors.feedCount.wow && parseInt(querySelectors.feedCount.wow.textContent || "0",10) || 0,
                     },
                     quotedPost: {
                         Id: querySelectors.quotedPost.Id && parseInt(querySelectors.quotedPost.Id
                             .attributes[config.QuotedPost.Id.attribute as any].value
-                            .match(new RegExp(config.QuotedPost.Id.pattern))[1]
-                            || "0",10),
+                            .match(eval(config.QuotedPost.Id.pattern))[1]
+                            || "0",10) || null,
                         value: ((_ : any) => (
                             _ = _ && _.parentElement,
                             _ = _ && _.querySelector(config.QuotedPost.Value.selector),

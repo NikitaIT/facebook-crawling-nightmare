@@ -11,7 +11,7 @@ export function scrollDown(
 		previousHeight = -1, 
 		currentHeight = 0, 
 		maxIterationsCount = 1
-	} = {}) {
+	} = {}): Promise<Nightmare> {
 	return new Promise<Nightmare>((resolve,reject) =>{
 		if (previousHeight !== currentHeight && maxIterationsCount--) {
 			console.log(previousHeight, maxIterationsCount)

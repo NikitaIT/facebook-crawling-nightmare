@@ -21,7 +21,7 @@ import { TPostPage, PostPages } from '../../Area/Person/Posts/Posts';
 import { Login } from '../../Area/Login/Login';
 import { Automapper } from '../../infrastructure/Automapper';
 import { goToPage } from '../../utils/Facebook';
-import { Groups } from '../../Area/Group/Group';
+import { Groups, GroupMembers } from '../../Area/Group/Group';
 import { PageType } from '../../Area/PageTypes';
 import { Friends } from '../../Area/Person/Friends/Friends';
 
@@ -39,12 +39,14 @@ interface IFacebook{
 	getComment(nightmare : Nightmare) : Promise<Comment[]>
 	getContact(nightmare : Nightmare) : Promise<Contact>
 	getGroup(nightmare : Nightmare,id: string) : Promise<Group>
+	getGroupMembers(nightmare : Nightmare,id: string) : Promise<Person[]>
 	getPhoto(nightmare : Nightmare) : Promise<Photo[]>
 	getPhotoTag(nightmare : Nightmare) : Promise<PhotoTag>
 	getPost(nightmare : Nightmare) : Promise<Post[]>
 	getRelative(nightmare : Nightmare) : Promise<Relative>
 }
 export default class Facebook implements IFacebook {
+
 	profile: () => Nightmare;
 	private gotoProfilePage =  (nightmare: Nightmare) => ( id: string|number ) => goToPage(nightmare, id).wait('#fbTimelineHeadline');
 	private gotoPageForProfile = () => gotoPageFor(this.profile());
@@ -52,16 +54,12 @@ export default class Facebook implements IFacebook {
 		this.profile = () => this.gotoProfilePage(nightmare)(id);
 	}
 	getPerson(nightmare: Nightmare): Promise<Person> {
-		return chainPromiseFn(
-			[LifeEvents,ContactandBasicInfo]
-			.map((x: (_: any) => any) => x(this.gotoPageForProfile()))
-		)
-		.then((x: [TLifeEvents,TContactandBasicInfo])=>
+		return (async ()=>
 			Automapper.smartAssign(
-				Automapper.mapToPerson.FromTLifeEvents(x[0]),
-				Automapper.mapToPerson.FromTContactandBasicInfo(x[1]),
+				Automapper.mapToPerson.FromTLifeEvents( await LifeEvents(this.gotoPageForProfile())()),
+				Automapper.mapToPerson.FromTContactandBasicInfo( await ContactandBasicInfo(this.gotoPageForProfile())()),
 			)
-		);
+		)();
 	}
 	getAlbum(nightmare: Nightmare): Promise<Album[]> {
 		return PhotosPages(this.gotoPageForProfile())
@@ -82,6 +80,9 @@ export default class Facebook implements IFacebook {
 	getGroup(nightmare: Nightmare,id: string): Promise<Group> {
 		return Groups(goToPage(nightmare, id, PageType.Group))();
 	}
+	getCommunityOrPublicFigure(nightmare: Nightmare,id: string): Promise<Group> {
+		return CommunityOrPublicFigure(goToPage(nightmare, id, PageType.CommunityOrPublicFigure))();
+	}
 	getPhoto(nightmare: Nightmare): Promise<Photo[]> {
 		return PhotosPages(this.gotoPageForProfile())
 				(EPhotosTabs.PhotosOf)
@@ -97,6 +98,10 @@ export default class Facebook implements IFacebook {
 	}
 	getRelative(nightmare: Nightmare): Promise<Relative> {
 		throw new Error("Method not implemented.");
+	}	
+	getGroupMembers(nightmare: Nightmare, id: string): Promise<Person[]> {
+		return GroupMembers(goToPage(nightmare, id, PageType.Group))
+			.then(_ => _.Members.Members.Users);
 	}
 	authPage(nightmare : Nightmare, email: string, password: string): Promise<{}> {
 		return Login(nightmare,email,password)();
