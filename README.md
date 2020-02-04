@@ -1,5 +1,7 @@
 # electron-quick-start-typescript
 
+Проект породолжил развитие в рамках закрытого коммерческого решения.
+
 ```bash
 # Clone this repository
 git clone https://github.com/NikitaIT/facebook-crawling-nightmare
