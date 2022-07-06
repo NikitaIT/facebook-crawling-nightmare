@@ -45,7 +45,7 @@
     "bluebird": "^3.5.1",
     "lodash": "^4.17.10",
     "log4js": "^2.10.0",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "nightmare": "~3.0.1",
     "user-agent-array": "^1.0.1"
   },
