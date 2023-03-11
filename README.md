@@ -1,6 +1,6 @@
 # electron-quick-start-typescript
 
-Проект породолжил развитие в рамках закрытого коммерческого решения.
+The project has spawned development within a closed source commercial solution.
 
 ```bash
 # Clone this repository
@@ -11,7 +11,7 @@ cd facebook-crawling-nightmare
 npm install
 ```
 
-Далее необходимо заменить типы node_modules/@types/nightmare на те что в проекте @types/nightmare.(из-за того что неймспейс nightmare называется как класс, переопределение настроить не удалось)
+Next, you need to replace the node_modules/@types/nightmare types with those in the @types/nightmare project. (due to the fact that the namespace nightmare is called as a class, the redefinition could not be configured)
 
 ```bash
 # Run the app
